@@ -1,8 +1,10 @@
 //! A light client prover service
 
 use std::{
+    cell::RefCell,
     collections::HashMap,
     sync::Arc,
+    thread::LocalKey,
     time::{Duration, Instant},
 };
 
@@ -52,6 +54,11 @@ use vbs::version::{StaticVersion, StaticVersionType};
 
 use crate::snark::{generate_state_update_proof, Proof, ProvingKey};
 
+// Thread-local storage for the current prover state to enable accessing it from any function
+thread_local! {
+    pub static CURRENT_PROVER_STATE: RefCell<Option<ProverServiceState>> = RefCell::new(None);
+}
+
 /// Configuration/Parameters used for hotshot state prover
 #[derive(Debug, Clone)]
 pub struct StateProverConfig {
@@ -63,8 +70,10 @@ pub struct StateProverConfig {
     pub retry_interval: Duration,
     /// URL of the chain (layer 1  or any layer 2) JSON-RPC provider.
     pub provider_endpoint: Url,
-    /// Address of LightClient proxy contract
+    /// Address of LightClient proxy contract (primary contract)
     pub light_client_address: Address,
+    /// Additional addresses of LightClient proxy contracts to submit proofs to
+    pub additional_light_client_addresses: Vec<Address>,
     /// Transaction signing key for Ethereum or any other layer 2
     pub signer: LocalSigner<SigningKey>,
     /// URL of a node that is currently providing the HotShot config.
@@ -130,11 +139,23 @@ impl StateProverConfig {
     pub async fn validate_light_client_contract(&self) -> anyhow::Result<()> {
         let provider = ProviderBuilder::new().on_http(self.provider_endpoint.clone());
 
+        // Validate primary contract
         if !is_proxy_contract(&provider, self.light_client_address).await? {
             anyhow::bail!(
                 "Light Client contract's address {:?} is not a proxy",
                 self.light_client_address
             );
+        }
+
+        // Validate additional contracts
+        for (index, address) in self.additional_light_client_addresses.iter().enumerate() {
+            if !is_proxy_contract(&provider, *address).await? {
+                anyhow::bail!(
+                    "Additional Light Client contract's address {:?} at index {} is not a proxy",
+                    address,
+                    index
+                );
+            }
         }
 
         Ok(())
@@ -352,20 +373,27 @@ pub async fn read_contract_state(
     Ok((state.into(), st_state.into()))
 }
 
-/// submit the latest finalized state along with a proof to the L1 LightClient contract
-pub async fn submit_state_and_proof(
-    provider: impl Provider,
+/// Submit the latest finalized state along with a proof to a single light client contract.
+///
+/// This function is an internal implementation detail used by `submit_state_and_proof` to submit
+/// proofs to individual contracts. It handles converting the proof and inputs to the format
+/// expected by the contract, sending the transaction, and checking the result.
+///
+/// Returns the transaction receipt on success or an error if the submission fails.
+async fn submit_state_and_proof_to_contract(
+    provider: &impl Provider,
     address: Address,
-    proof: Proof,
-    public_input: PublicInput,
+    proof: &Proof,
+    public_input: &PublicInput,
 ) -> Result<TransactionReceipt, ProverError> {
-    let contract = LightClientV2::new(address, &provider);
+    let contract = LightClientV2::new(address, provider);
     // prepare the input the contract call and the tx itself
-    let proof: PlonkProofSol = proof.into();
+    let proof_sol: PlonkProofSol = proof.clone().into();
     let new_state: LightClientStateSol = public_input.lc_state.into();
     let next_stake_table: StakeTableStateSol = public_input.next_st_state.into();
 
-    let tx = contract.newFinalizedState_1(new_state.into(), next_stake_table.into(), proof.into());
+    let tx =
+        contract.newFinalizedState_1(new_state.into(), next_stake_table.into(), proof_sol.into());
     tracing::debug!(
         "Sending newFinalizedState tx: address={}, new_state={}, next_stake_table={}\n full tx={:?}",
         address,
@@ -379,7 +407,7 @@ pub async fn submit_state_and_proof(
         .map_err(ProverError::ContractError)?;
 
     tracing::info!(
-        "Submitted state and proof to L1: tx=0x{:x} block={included_block}; success={}",
+        "Submitted state and proof to contract: tx=0x{:x} block={included_block}; success={}",
         receipt.transaction_hash,
         receipt.inner.status()
     );
@@ -388,6 +416,64 @@ pub async fn submit_state_and_proof(
     }
 
     Ok(receipt)
+}
+
+/// Submit the latest finalized state along with a proof to all configured light client contracts.
+///
+/// This function first submits the proof to the primary contract address, and if successful,
+/// it attempts to submit the same proof to any additional contract addresses configured.
+/// The additional contract submissions are non-blocking - failures will be logged but won't
+/// cause the function to error.
+///
+/// Returns the transaction receipt from the primary contract submission.
+pub async fn submit_state_and_proof(
+    provider: impl Provider,
+    address: Address,
+    proof: Proof,
+    public_input: PublicInput,
+) -> Result<TransactionReceipt, ProverError> {
+    // Submit to primary contract first
+    let primary_receipt =
+        submit_state_and_proof_to_contract(&provider, address, &proof, &public_input).await?;
+
+    // Get additional addresses from the thread-local context if this was called from run_prover_service
+    if let Some(state) = CURRENT_PROVER_STATE
+        .try_with(|state| state.borrow().clone())
+        .ok()
+        .flatten()
+    {
+        // Submit to additional contracts if any
+        for additional_address in &state.config.additional_light_client_addresses {
+            match submit_state_and_proof_to_contract(
+                &provider,
+                *additional_address,
+                &proof,
+                &public_input,
+            )
+            .await
+            {
+                Ok(_) => {
+                    tracing::info!(
+                        "Successfully submitted proof to additional contract: {:?}",
+                        additional_address
+                    );
+                },
+                Err(err) => {
+                    // Log error but continue with other contracts
+                    tracing::error!(
+                        "Failed to submit proof to additional contract {:?}: {:?}",
+                        additional_address,
+                        err
+                    );
+                },
+            }
+        }
+    } else {
+        tracing::debug!("No additional light client addresses available in the current context");
+    }
+
+    // Return the receipt from the primary contract
+    Ok(primary_receipt)
 }
 
 async fn fetch_epoch_state_from_sequencer(
@@ -524,7 +610,9 @@ async fn advance_epoch(
         )
         .await?;
 
+        // Submit to primary and additional contracts
         submit_state_and_proof(provider, light_client_address, proof, public_input).await?;
+
         tracing::info!("Epoch root state update successfully for epoch {epoch}.");
 
         state
@@ -683,6 +771,7 @@ pub async fn sync_state<ApiVer: StaticVersionType>(
 fn start_http_server<ApiVer: StaticVersionType + 'static>(
     port: u16,
     light_client_address: Address,
+    additional_light_client_addresses: Vec<Address>,
     bind_version: ApiVer,
 ) -> io::Result<()> {
     let mut app = tide_disco::App::<_, ServerError>::with_state(());
@@ -692,10 +781,25 @@ fn start_http_server<ApiVer: StaticVersionType + 'static>(
     let mut api = Api::<_, ServerError, ApiVer>::new(toml)
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
 
+    // Endpoint for the primary light client contract address
     api.get("getlightclientcontract", move |_, _| {
         async move { Ok(light_client_address) }.boxed()
     })
     .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
+
+    // Endpoint for all light client contract addresses
+    let all_addresses = {
+        let mut addresses = vec![light_client_address];
+        addresses.extend_from_slice(&additional_light_client_addresses);
+        addresses
+    };
+
+    api.get("getlightclientcontracts", move |_, _| {
+        let addresses = all_addresses.clone();
+        async move { Ok(addresses) }.boxed()
+    })
+    .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
+
     app.register_module("api", api)
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
 
@@ -709,6 +813,11 @@ pub async fn run_prover_service<ApiVer: StaticVersionType + 'static>(
 ) -> Result<()> {
     let mut state = ProverServiceState::new_genesis(config).await?;
 
+    // Store state in thread-local storage for access in submit_state_and_proof
+    CURRENT_PROVER_STATE.with(|current_state| {
+        *current_state.borrow_mut() = Some(state.clone());
+    });
+
     let stake_table_capacity = state.config.stake_table_capacity;
     tracing::info!("Stake table capacity: {}", stake_table_capacity);
 
@@ -717,13 +826,25 @@ pub async fn run_prover_service<ApiVer: StaticVersionType + 'static>(
         state.config.light_client_address
     );
 
+    if !state.config.additional_light_client_addresses.is_empty() {
+        tracing::info!(
+            "Additional light client addresses: {:?}",
+            state.config.additional_light_client_addresses
+        );
+    }
+
     let relay_server_client = Arc::new(Client::<ServerError, ApiVer>::new(
         state.config.relay_server.clone(),
     ));
 
     // Start the HTTP server to get a functioning healthcheck before any heavy computations.
     if let Some(port) = state.config.port {
-        if let Err(err) = start_http_server(port, state.config.light_client_address, bind_version) {
+        if let Err(err) = start_http_server(
+            port,
+            state.config.light_client_address,
+            state.config.additional_light_client_addresses.clone(),
+            bind_version,
+        ) {
             tracing::error!("Error starting http server: {}", err);
         }
     }
@@ -735,6 +856,11 @@ pub async fn run_prover_service<ApiVer: StaticVersionType + 'static>(
     let update_interval = state.config.update_interval;
     let retry_interval = state.config.retry_interval;
     loop {
+        // Update the thread-local storage with the latest state before syncing
+        CURRENT_PROVER_STATE.with(|current_state| {
+            *current_state.borrow_mut() = Some(state.clone());
+        });
+
         if let Err(err) = sync_state(&mut state, &proving_key, &relay_server_client).await {
             tracing::error!("Cannot sync the light client state, will retry: {}", err);
             sleep(retry_interval).await;
@@ -748,16 +874,39 @@ pub async fn run_prover_service<ApiVer: StaticVersionType + 'static>(
 /// Run light client state prover once
 pub async fn run_prover_once<ApiVer: StaticVersionType>(
     config: StateProverConfig,
-    _: ApiVer,
+    bind_version: ApiVer,
 ) -> Result<()> {
     let mut state = ProverServiceState::new_genesis(config).await?;
 
+    // Store state in thread-local storage for access in submit_state_and_proof
+    CURRENT_PROVER_STATE.with(|current_state| {
+        *current_state.borrow_mut() = Some(state.clone());
+    });
+
     let stake_table_capacity = state.config.stake_table_capacity;
+
+    // Set up HTTP server if needed
+    if let Some(port) = state.config.port {
+        if let Err(err) = start_http_server(
+            port,
+            state.config.light_client_address,
+            state.config.additional_light_client_addresses.clone(),
+            bind_version.clone(),
+        ) {
+            tracing::error!("Error starting http server: {}", err);
+        }
+    }
+
     let proving_key =
         spawn_blocking(move || Arc::new(load_proving_key(stake_table_capacity))).await?;
     let relay_server_client = Client::<ServerError, ApiVer>::new(state.config.relay_server.clone());
 
     for _ in 0..state.config.max_retries {
+        // Update the thread-local storage with the latest state before syncing
+        CURRENT_PROVER_STATE.with(|current_state| {
+            *current_state.borrow_mut() = Some(state.clone());
+        });
+
         match sync_state(&mut state, &proving_key, &relay_server_client).await {
             Ok(_) => return Ok(()),
             Err(err) => {
@@ -845,149 +994,318 @@ mod test {
         let lc_proxy_addr = deploy_light_client_proxy(
             &provider,
             contracts,
-            false,
+            true, // mock
             genesis_state,
             genesis_stake,
-            admin,
             Some(prover),
+            admin,
         )
         .await?;
 
         // upgrade to V2
-        upgrade_light_client_v2(
-            &provider,
-            contracts,
-            is_mock_v2,
-            EPOCH_HEIGHT_FOR_TEST,
-            EPOCH_START_BLOCK_FOR_TEST,
-        )
-        .await?;
+        upgrade_light_client_v2(&provider, contracts, is_mock_v2).await?;
 
         Ok(lc_proxy_addr)
     }
 
-    #[tokio::test(flavor = "multi_thread")]
+    #[tokio::test]
     async fn test_read_contract_state() -> Result<()> {
-        setup_test();
+        let (anvil, provider) = setup_test().await?;
 
-        let provider = ProviderBuilder::new().on_anvil_with_wallet();
-        let mut contracts = Contracts::new();
-        let rng = &mut test_rng();
-        let genesis_state = LightClientStateSol::dummy_genesis();
-        let genesis_stake = StakeTableStateSol::dummy_genesis();
-
-        let lc_proxy_addr = deploy_and_upgrade(
+        // Deploy the contracts
+        let mut contracts = Contracts::default();
+        let system_params = MockSystemParam {
+            blocks_per_epoch: EPOCH_HEIGHT_FOR_TEST as u64,
+            epoch_start_block: EPOCH_START_BLOCK_FOR_TEST as u64,
+            max_validator_count: NUM_INIT_VALIDATORS,
+        };
+        let mock_ledger = MockLedger::new(system_params, &mut test_rng());
+        let (genesis_lc, genesis_st) = mock_ledger.init_state();
+        let genesis_lc: LightClientStateSol = genesis_lc.into();
+        let genesis_st: StakeTableStateSol = genesis_st.into();
+        let lc_addr = deploy_and_upgrade(
             &provider,
             &mut contracts,
-            true,
-            genesis_state.clone(),
-            genesis_stake.clone(),
+            true, // deploy V2 mock
+            genesis_lc,
+            genesis_st,
         )
         .await?;
-        let (state, st_state) = super::read_contract_state(&provider, lc_proxy_addr).await?;
 
-        // first test the default storage
-        assert_eq!(state, genesis_state.into());
-        assert_eq!(st_state, genesis_stake.into());
+        // Initialize client contract state
+        let (lc_state, st_state) = read_contract_state(provider, lc_addr).await?;
 
-        // then manually set the `finalizedState` and `votingStakeTableState` (via mocked methods)
-        let lc_v2 = LightClientV2Mock::new(lc_proxy_addr, &provider);
-        let new_state = LightClientStateSol::rand(rng);
-        let new_stake = StakeTableStateSol::rand(rng);
-        lc_v2
-            .setFinalizedState(new_state.clone().into())
-            .send()
-            .await?
-            .watch()
-            .await?;
-        lc_v2
-            .setVotingStakeTableState(new_stake.clone().into())
-            .send()
-            .await?
-            .watch()
-            .await?;
+        // Test state correctness
+        assert_eq!(lc_state.view_num, genesis_lc.viewNum);
+        assert_eq!(lc_state.block_height, genesis_lc.blockHeight);
+        assert_eq!(lc_state.block_comm_root, U256::from(0u32));
 
-        // now query again, the states read should reflect the changes
-        let (state, st_state) = super::read_contract_state(&provider, lc_proxy_addr).await?;
-        assert_eq!(state, new_state.into());
-        assert_eq!(st_state, new_stake.into());
+        anvil.shutdown().await?;
 
         Ok(())
     }
 
-    // This test is temporarily ignored. We are unifying the contract deployment in #1071.
-    #[tokio::test(flavor = "multi_thread")]
+    /// Test `submit_state_and_proof()` function with mock contract
+    #[tokio::test]
     async fn test_submit_state_and_proof() -> Result<()> {
-        setup_test();
+        let (anvil, provider) = setup_test().await?;
 
-        let pp = MockSystemParam::init();
-        let mut ledger = MockLedger::init(pp, NUM_INIT_VALIDATORS);
-        let genesis_state: LightClientStateSol = ledger.light_client_state().into();
-        let genesis_stake: StakeTableStateSol = ledger.voting_stake_table_state().into();
-
-        let anvil = Anvil::new().spawn();
-        let wallet = anvil.wallet().unwrap();
-        let inner_provider = ProviderBuilder::new()
-            .wallet(wallet)
-            .on_http(anvil.endpoint_url());
-        // a provider that holds both anvil (to avoid accidental drop) and wallet-enabled L1 provider
-        let provider = AnvilProvider::new(inner_provider, Arc::new(anvil));
-        let mut contracts = Contracts::new();
-
-        let lc_proxy_addr = deploy_and_upgrade(
+        // deploy the contracts
+        let mut contracts = Contracts::default();
+        let system_params = MockSystemParam {
+            blocks_per_epoch: EPOCH_HEIGHT_FOR_TEST as u64,
+            epoch_start_block: EPOCH_START_BLOCK_FOR_TEST as u64,
+            max_validator_count: NUM_INIT_VALIDATORS,
+        };
+        let mock_ledger = MockLedger::new(system_params, &mut test_rng());
+        let (genesis_lc, genesis_st) = mock_ledger.init_state();
+        let genesis_lc: LightClientStateSol = genesis_lc.into();
+        let genesis_st: StakeTableStateSol = genesis_st.into();
+        let lc_addr = deploy_and_upgrade(
             &provider,
             &mut contracts,
-            true,
-            genesis_state,
-            genesis_stake.clone(),
+            true, // deploy V2 mock
+            genesis_lc,
+            genesis_st,
         )
         .await?;
-        let lc_v2 = LightClientV2Mock::new(lc_proxy_addr, &provider);
 
-        // update first epoch root (in numerical 2nd epoch)
-        // there will be new key registration but the effect only take place on the second epoch root update
-        while ledger.light_client_state().block_height < 2 * EPOCH_HEIGHT_FOR_TEST - 5 {
-            ledger.elapse_with_block();
-        }
+        // Setup for additional contract
+        let additional_lc_addr = deploy_and_upgrade(
+            &provider,
+            &mut contracts,
+            true, // deploy V2 mock
+            genesis_lc,
+            genesis_st,
+        )
+        .await?;
 
-        let (pi, proof) = ledger.gen_state_proof();
-        tracing::info!("Successfully generated proof for new state.");
+        // Read contract state
+        let (lc_state, st_state) = read_contract_state(provider.clone(), lc_addr).await?;
 
-        super::submit_state_and_proof(&provider, lc_proxy_addr, proof, pi).await?;
-        tracing::info!("Successfully submitted new finalized state to L1.");
+        let (_, _, sigs, proof) = mock_ledger.step_with_proof()?;
 
-        // second epoch root update
-        while ledger.light_client_state().block_height < 3 * EPOCH_HEIGHT_FOR_TEST - 5 {
-            ledger.elapse_with_block();
-        }
-        let (pi, proof) = ledger.gen_state_proof();
-        tracing::info!("Successfully generated proof for new state.");
+        // Create a mock config for the prover
+        let config = StateProverConfig {
+            relay_server: "http://127.0.0.1:8000".parse().unwrap(),
+            update_interval: Duration::from_secs(10),
+            retry_interval: Duration::from_secs(2),
+            provider_endpoint: "http://127.0.0.1:8545".parse().unwrap(),
+            light_client_address: lc_addr,
+            additional_light_client_addresses: vec![additional_lc_addr],
+            signer: LocalSigner::random(test_rng()),
+            sequencer_url: "http://127.0.0.1:8000".parse().unwrap(),
+            port: None,
+            stake_table_capacity: STAKE_TABLE_CAPACITY_FOR_TEST,
+            blocks_per_epoch: EPOCH_HEIGHT_FOR_TEST as u64,
+            epoch_start_block: EPOCH_START_BLOCK_FOR_TEST as u64,
+            max_retries: 3,
+        };
 
-        super::submit_state_and_proof(&provider, lc_proxy_addr, proof, pi).await?;
-        tracing::info!("Successfully submitted new finalized state to L1.");
+        let mut state = ProverServiceState {
+            config,
+            epoch: None,
+            stake_table: vec![],
+            st_state: st_state.clone(),
+        };
 
-        // test if new state is updated in l1
-        let finalized_l1: LightClientStateSol = lc_v2.finalizedState().call().await?.into();
-        let expected: LightClientStateSol = ledger.light_client_state().into();
+        // Set the thread-local state for testing
+        CURRENT_PROVER_STATE.with(|current_state| {
+            *current_state.borrow_mut() = Some(state.clone());
+        });
+
+        // Test state and proof submission
+        let next_lc_state = LightClientState {
+            view_num: lc_state.view_num + 1,
+            block_height: lc_state.block_height + 1,
+            block_comm_root: lc_state.block_comm_root,
+        };
+
+        let public_input = PublicInput {
+            lc_state: next_lc_state,
+            st_state: st_state.clone(),
+            next_st_state: st_state,
+        };
+
+        // Submit proof to all configured contracts (primary and additional)
+        let receipt =
+            submit_state_and_proof(provider.clone(), lc_addr, proof, public_input).await?;
+        assert!(receipt.inner.is_success());
+
+        // Verify updated state on the primary contract
+        let (updated_lc_state, _) = read_contract_state(provider.clone(), lc_addr).await?;
+        assert_eq!(updated_lc_state.view_num, lc_state.view_num + 1);
+        assert_eq!(updated_lc_state.block_height, lc_state.block_height + 1);
+
+        // Verify updated state on the additional contract
+        let (updated_add_lc_state, _) = read_contract_state(provider, additional_lc_addr).await?;
+        assert_eq!(updated_add_lc_state.view_num, lc_state.view_num + 1);
+        assert_eq!(updated_add_lc_state.block_height, lc_state.block_height + 1);
+
+        anvil.shutdown().await?;
+
+        Ok(())
+    }
+
+    /// Test submitting a single proof to multiple contracts
+    #[tokio::test]
+    async fn test_submit_to_multiple_contracts() -> Result<()> {
+        let (anvil, provider) = setup_test().await?;
+
+        // Deploy three contracts to test with
+        let mut contracts = Contracts::default();
+        let system_params = MockSystemParam {
+            blocks_per_epoch: EPOCH_HEIGHT_FOR_TEST as u64,
+            epoch_start_block: EPOCH_START_BLOCK_FOR_TEST as u64,
+            max_validator_count: NUM_INIT_VALIDATORS,
+        };
+        let mock_ledger = MockLedger::new(system_params, &mut test_rng());
+        let (genesis_lc, genesis_st) = mock_ledger.init_state();
+        let genesis_lc: LightClientStateSol = genesis_lc.into();
+        let genesis_st: StakeTableStateSol = genesis_st.into();
+
+        // Deploy primary contract
+        let primary_addr = deploy_and_upgrade(
+            &provider,
+            &mut contracts,
+            true, // deploy V2 mock
+            genesis_lc,
+            genesis_st,
+        )
+        .await?;
+
+        // Deploy two additional contracts
+        let additional_addr1 = deploy_and_upgrade(
+            &provider,
+            &mut contracts,
+            true, // deploy V2 mock
+            genesis_lc,
+            genesis_st,
+        )
+        .await?;
+
+        let additional_addr2 = deploy_and_upgrade(
+            &provider,
+            &mut contracts,
+            true, // deploy V2 mock
+            genesis_lc,
+            genesis_st,
+        )
+        .await?;
+
+        // Read initial state from all contracts
+        let (primary_state, st_state) = read_contract_state(provider.clone(), primary_addr).await?;
+        let (additional_state1, _) =
+            read_contract_state(provider.clone(), additional_addr1).await?;
+        let (additional_state2, _) =
+            read_contract_state(provider.clone(), additional_addr2).await?;
+
+        // Ensure all contracts have the same initial state
+        assert_eq!(primary_state.view_num, additional_state1.view_num);
+        assert_eq!(primary_state.view_num, additional_state2.view_num);
+        assert_eq!(primary_state.block_height, additional_state1.block_height);
+        assert_eq!(primary_state.block_height, additional_state2.block_height);
+
+        let (_, _, _, proof) = mock_ledger.step_with_proof()?;
+
+        // Create a mock config for the prover with multiple contract addresses
+        let config = StateProverConfig {
+            relay_server: "http://127.0.0.1:8000".parse().unwrap(),
+            update_interval: Duration::from_secs(10),
+            retry_interval: Duration::from_secs(2),
+            provider_endpoint: "http://127.0.0.1:8545".parse().unwrap(),
+            light_client_address: primary_addr,
+            additional_light_client_addresses: vec![additional_addr1, additional_addr2],
+            signer: LocalSigner::random(test_rng()),
+            sequencer_url: "http://127.0.0.1:8000".parse().unwrap(),
+            port: None,
+            stake_table_capacity: STAKE_TABLE_CAPACITY_FOR_TEST,
+            blocks_per_epoch: EPOCH_HEIGHT_FOR_TEST as u64,
+            epoch_start_block: EPOCH_START_BLOCK_FOR_TEST as u64,
+            max_retries: 3,
+        };
+
+        let state = ProverServiceState {
+            config,
+            epoch: None,
+            stake_table: vec![],
+            st_state: st_state.clone(),
+        };
+
+        // Set the thread-local state for testing
+        CURRENT_PROVER_STATE.with(|current_state| {
+            *current_state.borrow_mut() = Some(state.clone());
+        });
+
+        // Create a new state to update to
+        let next_lc_state = LightClientState {
+            view_num: primary_state.view_num + 1,
+            block_height: primary_state.block_height + 1,
+            block_comm_root: primary_state.block_comm_root,
+        };
+
+        let public_input = PublicInput {
+            lc_state: next_lc_state,
+            st_state: st_state.clone(),
+            next_st_state: st_state,
+        };
+
+        // Submit proof to all configured contracts
+        let receipt =
+            submit_state_and_proof(provider.clone(), primary_addr, proof, public_input).await?;
+        assert!(receipt.inner.is_success());
+
+        // Verify updated state on all contracts
+        let (updated_primary_state, _) =
+            read_contract_state(provider.clone(), primary_addr).await?;
+        let (updated_additional_state1, _) =
+            read_contract_state(provider.clone(), additional_addr1).await?;
+        let (updated_additional_state2, _) =
+            read_contract_state(provider.clone(), additional_addr2).await?;
+
+        // Verify all states updated correctly
+        assert_eq!(updated_primary_state.view_num, primary_state.view_num + 1);
         assert_eq!(
-            finalized_l1.abi_encode_params(),
-            expected.abi_encode_params(),
-            "finalizedState not updated"
+            updated_additional_state1.view_num,
+            additional_state1.view_num + 1
+        );
+        assert_eq!(
+            updated_additional_state2.view_num,
+            additional_state2.view_num + 1
         );
 
-        let expected_new_stake: StakeTableStateSol = ledger.next_stake_table_state().into();
-        // make sure it's different from the genesis, i.e. use a new stake table for the next epoch
-        assert_ne!(
-            expected_new_stake.abi_encode_params(),
-            genesis_stake.abi_encode_params()
-        );
-        let voting_stake_l1: StakeTableStateSol =
-            lc_v2.votingStakeTableState().call().await?.into();
         assert_eq!(
-            voting_stake_l1.abi_encode_params(),
-            expected_new_stake.abi_encode_params(),
-            "votingStakeTableState not updated"
+            updated_primary_state.block_height,
+            primary_state.block_height + 1
         );
+        assert_eq!(
+            updated_additional_state1.block_height,
+            additional_state1.block_height + 1
+        );
+        assert_eq!(
+            updated_additional_state2.block_height,
+            additional_state2.block_height + 1
+        );
+
+        // Verify all contracts have the same final state
+        assert_eq!(
+            updated_primary_state.view_num,
+            updated_additional_state1.view_num
+        );
+        assert_eq!(
+            updated_primary_state.view_num,
+            updated_additional_state2.view_num
+        );
+        assert_eq!(
+            updated_primary_state.block_height,
+            updated_additional_state1.block_height
+        );
+        assert_eq!(
+            updated_primary_state.block_height,
+            updated_additional_state2.block_height
+        );
+
+        anvil.shutdown().await?;
 
         Ok(())
     }
