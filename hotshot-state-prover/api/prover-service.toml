@@ -1,4 +1,9 @@
 [route.getlightclientcontract]
 PATH = ["/lightclient_contract"]
 METHOD = "GET"
-DOC = "Get the address of light client contract on Layer1."
+DOC = "Get the address of the primary light client contract on Layer1."
+
+[route.getlightclientcontracts]
+PATH = ["/lightclient_contracts"]
+METHOD = "GET"
+DOC = "Get the addresses of all light client contracts (primary and additional ones)."
