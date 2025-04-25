@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["STAKE_TABLE_CAPACITY_FOR_TEST"],"fn":["add_multiple_delegators","make_provider","pos_deploy_routine","stake_for_demo","stake_in_contract_for_test"],"type":["Prov","StakeTableVecBased"]};
