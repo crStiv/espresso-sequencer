@@ -2,21 +2,21 @@
     // Required methods
     fn <a href="#tymethod.get_latest_signature_bundle" class="fn">get_latest_signature_bundle</a>(
         &amp;self,
-    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../../../hotshot_types/light_client/struct.StateSignaturesBundle.html" title="struct hotshot_types::light_client::StateSignaturesBundle">StateSignaturesBundle</a>, ServerError&gt;;
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;StateSignaturesBundle, ServerError&gt;;
 <span class="item-spacer"></span>    fn <a href="#tymethod.post_signature" class="fn">post_signature</a>&lt;'life0, 'async_trait&gt;(
         &amp;'life0 mut self,
-        req: <a class="struct" href="../../../hotshot_types/light_client/struct.StateSignatureRequestBody.html" title="struct hotshot_types::light_client::StateSignatureRequestBody">StateSignatureRequestBody</a>,
+        req: StateSignatureRequestBody,
     ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.86.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, ServerError&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
        <span class="where">where Self: 'async_trait,
              'life0: 'async_trait</span>;
 }</code></pre><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.get_latest_signature_bundle" class="method"><a class="src rightside" href="../../../src/sequencer/state_signature/relay_server.rs.html#273">Source</a><h4 class="code-header">fn <a href="#tymethod.get_latest_signature_bundle" class="fn">get_latest_signature_bundle</a>(
     &amp;self,
-) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../../../hotshot_types/light_client/struct.StateSignaturesBundle.html" title="struct hotshot_types::light_client::StateSignaturesBundle">StateSignaturesBundle</a>, ServerError&gt;</h4></section></summary><div class="docblock"><p>Get the latest available signatures bundle.</p>
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;StateSignaturesBundle, ServerError&gt;</h4></section></summary><div class="docblock"><p>Get the latest available signatures bundle.</p>
 <h5 id="errors"><a class="doc-anchor" href="#errors">§</a>Errors</h5>
 <p>Errors if there’s no available signatures bundle.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.post_signature" class="method"><a class="src rightside" href="../../../src/sequencer/state_signature/relay_server.rs.html#278">Source</a><h4 class="code-header">fn <a href="#tymethod.post_signature" class="fn">post_signature</a>&lt;'life0, 'async_trait&gt;(
     &amp;'life0 mut self,
-    req: <a class="struct" href="../../../hotshot_types/light_client/struct.StateSignatureRequestBody.html" title="struct hotshot_types::light_client::StateSignatureRequestBody">StateSignatureRequestBody</a>,
+    req: StateSignatureRequestBody,
 ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.86.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, ServerError&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
     Self: 'async_trait,
     'life0: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Post a signature to the relay server</p>
