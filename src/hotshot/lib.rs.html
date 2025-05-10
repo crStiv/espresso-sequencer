@@ -156,7 +156,7 @@
 <a href=#156 id=156 data-nosnippet>156</a>    </span><span class="kw">pub </span>id: u64,
 <a href=#157 id=157 data-nosnippet>157</a>
 <a href=#158 id=158 data-nosnippet>158</a>    <span class="doccomment">/// Reference to the internal storage for consensus datum.
-<a href=#159 id=159 data-nosnippet>159</a>    </span><span class="kw">pub </span>storage: Arc&lt;RwLock&lt;I::Storage&gt;&gt;,
+<a href=#159 id=159 data-nosnippet>159</a>    </span><span class="kw">pub </span>storage: I::Storage,
 <a href=#160 id=160 data-nosnippet>160</a>
 <a href=#161 id=161 data-nosnippet>161</a>    <span class="doccomment">/// shared lock for upgrade information
 <a href=#162 id=162 data-nosnippet>162</a>    </span><span class="kw">pub </span>upgrade_lock: UpgradeLock&lt;TYPES, V&gt;,
@@ -186,7 +186,7 @@
 <a href=#186 id=186 data-nosnippet>186</a>            anchored_leaf: <span class="self">self</span>.anchored_leaf.clone(),
 <a href=#187 id=187 data-nosnippet>187</a>            internal_event_stream: <span class="self">self</span>.internal_event_stream.clone(),
 <a href=#188 id=188 data-nosnippet>188</a>            id: <span class="self">self</span>.id,
-<a href=#189 id=189 data-nosnippet>189</a>            storage: Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.storage),
+<a href=#189 id=189 data-nosnippet>189</a>            storage: <span class="self">self</span>.storage.clone(),
 <a href=#190 id=190 data-nosnippet>190</a>            upgrade_lock: <span class="self">self</span>.upgrade_lock.clone(),
 <a href=#191 id=191 data-nosnippet>191</a>            marketplace_config: <span class="self">self</span>.marketplace_config.clone(),
 <a href=#192 id=192 data-nosnippet>192</a>        }
@@ -390,7 +390,7 @@
 <a href=#390 id=390 data-nosnippet>390</a>            output_event_stream: (external_tx.clone(), external_rx.clone().deactivate()),
 <a href=#391 id=391 data-nosnippet>391</a>            external_event_stream: (external_tx, external_rx.deactivate()),
 <a href=#392 id=392 data-nosnippet>392</a>            anchored_leaf: anchored_leaf.clone(),
-<a href=#393 id=393 data-nosnippet>393</a>            storage: Arc::new(RwLock::new(storage)),
+<a href=#393 id=393 data-nosnippet>393</a>            storage,
 <a href=#394 id=394 data-nosnippet>394</a>            upgrade_lock,
 <a href=#395 id=395 data-nosnippet>395</a>            marketplace_config,
 <a href=#396 id=396 data-nosnippet>396</a>        });
@@ -701,7 +701,7 @@
 <a href=#701 id=701 data-nosnippet>701</a>            output_event_stream: output_event_stream.clone(),
 <a href=#702 id=702 data-nosnippet>702</a>            internal_event_stream: internal_event_stream.clone(),
 <a href=#703 id=703 data-nosnippet>703</a>            hotshot: <span class="self">self</span>.clone().into(),
-<a href=#704 id=704 data-nosnippet>704</a>            storage: Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.storage),
+<a href=#704 id=704 data-nosnippet>704</a>            storage: <span class="self">self</span>.storage.clone(),
 <a href=#705 id=705 data-nosnippet>705</a>            network: Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.network),
 <a href=#706 id=706 data-nosnippet>706</a>            membership_coordinator: <span class="self">self</span>.membership_coordinator.clone(),
 <a href=#707 id=707 data-nosnippet>707</a>            epoch_height: <span class="self">self</span>.config.epoch_height,
@@ -886,7 +886,7 @@
 <a href=#886 id=886 data-nosnippet>886</a>            output_event_stream: left_external_event_stream.clone(),
 <a href=#887 id=887 data-nosnippet>887</a>            internal_event_stream: left_internal_event_stream.clone(),
 <a href=#888 id=888 data-nosnippet>888</a>            hotshot: Arc::clone(<span class="kw-2">&amp;</span>left_system_context),
-<a href=#889 id=889 data-nosnippet>889</a>            storage: Arc::clone(<span class="kw-2">&amp;</span>left_system_context.storage),
+<a href=#889 id=889 data-nosnippet>889</a>            storage: left_system_context.storage.clone(),
 <a href=#890 id=890 data-nosnippet>890</a>            network: Arc::clone(<span class="kw-2">&amp;</span>left_system_context.network),
 <a href=#891 id=891 data-nosnippet>891</a>            membership_coordinator: left_system_context.membership_coordinator.clone(),
 <a href=#892 id=892 data-nosnippet>892</a>            epoch_height,
@@ -898,7 +898,7 @@
 <a href=#898 id=898 data-nosnippet>898</a>            output_event_stream: right_external_event_stream.clone(),
 <a href=#899 id=899 data-nosnippet>899</a>            internal_event_stream: right_internal_event_stream.clone(),
 <a href=#900 id=900 data-nosnippet>900</a>            hotshot: Arc::clone(<span class="kw-2">&amp;</span>right_system_context),
-<a href=#901 id=901 data-nosnippet>901</a>            storage: Arc::clone(<span class="kw-2">&amp;</span>right_system_context.storage),
+<a href=#901 id=901 data-nosnippet>901</a>            storage: right_system_context.storage.clone(),
 <a href=#902 id=902 data-nosnippet>902</a>            network: Arc::clone(<span class="kw-2">&amp;</span>right_system_context.network),
 <a href=#903 id=903 data-nosnippet>903</a>            membership_coordinator: right_system_context.membership_coordinator.clone(),
 <a href=#904 id=904 data-nosnippet>904</a>            epoch_height,

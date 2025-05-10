@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Command"],"fn":["main"],"mod":["keygen","pubkey","reset_storage"],"struct":["Options"]};
+window.SIDEBAR_ITEMS = {"enum":["Command"],"fn":["main"],"mod":["keygen","ns_aggregator","pubkey","reset_storage"],"struct":["Options"]};

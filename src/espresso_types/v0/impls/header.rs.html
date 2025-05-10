@@ -628,7 +628,7 @@
 <a href=#628 id=628 data-nosnippet>628</a>                <span class="macro">tracing::info!</span>(<span class="string">"fetching chain config {} from peers"</span>, validated_cf.commit());
 <a href=#629 id=629 data-nosnippet>629</a>
 <a href=#630 id=630 data-nosnippet>630</a>                instance_state
-<a href=#631 id=631 data-nosnippet>631</a>                    .peers
+<a href=#631 id=631 data-nosnippet>631</a>                    .state_catchup
 <a href=#632 id=632 data-nosnippet>632</a>                    .as_ref()
 <a href=#633 id=633 data-nosnippet>633</a>                    .fetch_chain_config(validated_cf.commit())
 <a href=#634 id=634 data-nosnippet>634</a>                    .<span class="kw">await
@@ -926,7 +926,7 @@
 <a href=#926 id=926 data-nosnippet>926</a>
 <a href=#927 id=927 data-nosnippet>927</a>            <span class="comment">// Fetch missing fee state entries
 <a href=#928 id=928 data-nosnippet>928</a>            </span><span class="kw">let </span>missing_account_proofs = instance_state
-<a href=#929 id=929 data-nosnippet>929</a>                .peers
+<a href=#929 id=929 data-nosnippet>929</a>                .state_catchup
 <a href=#930 id=930 data-nosnippet>930</a>                .as_ref()
 <a href=#931 id=931 data-nosnippet>931</a>                .fetch_accounts(
 <a href=#932 id=932 data-nosnippet>932</a>                    instance_state,
@@ -949,7 +949,7 @@
 <a href=#949 id=949 data-nosnippet>949</a>        </span><span class="kw">if </span>validated_state.need_to_fetch_blocks_mt_frontier() {
 <a href=#950 id=950 data-nosnippet>950</a>            <span class="macro">tracing::warn!</span>(height, <span class="question-mark">?</span>view, <span class="string">"fetching block frontier from peers"</span>);
 <a href=#951 id=951 data-nosnippet>951</a>            instance_state
-<a href=#952 id=952 data-nosnippet>952</a>                .peers
+<a href=#952 id=952 data-nosnippet>952</a>                .state_catchup
 <a href=#953 id=953 data-nosnippet>953</a>                .as_ref()
 <a href=#954 id=954 data-nosnippet>954</a>                .remember_blocks_merkle_tree(
 <a href=#955 id=955 data-nosnippet>955</a>                    instance_state,
@@ -1059,7 +1059,7 @@
 <a href=#1059 id=1059 data-nosnippet>1059</a>
 <a href=#1060 id=1060 data-nosnippet>1060</a>            <span class="comment">// Fetch missing fee state entries
 <a href=#1061 id=1061 data-nosnippet>1061</a>            </span><span class="kw">let </span>missing_account_proofs = instance_state
-<a href=#1062 id=1062 data-nosnippet>1062</a>                .peers
+<a href=#1062 id=1062 data-nosnippet>1062</a>                .state_catchup
 <a href=#1063 id=1063 data-nosnippet>1063</a>                .as_ref()
 <a href=#1064 id=1064 data-nosnippet>1064</a>                .fetch_accounts(
 <a href=#1065 id=1065 data-nosnippet>1065</a>                    instance_state,
@@ -1082,7 +1082,7 @@
 <a href=#1082 id=1082 data-nosnippet>1082</a>        </span><span class="kw">if </span>validated_state.need_to_fetch_blocks_mt_frontier() {
 <a href=#1083 id=1083 data-nosnippet>1083</a>            <span class="macro">tracing::warn!</span>(height, <span class="question-mark">?</span>view, <span class="string">"fetching block frontier from peers"</span>);
 <a href=#1084 id=1084 data-nosnippet>1084</a>            instance_state
-<a href=#1085 id=1085 data-nosnippet>1085</a>                .peers
+<a href=#1085 id=1085 data-nosnippet>1085</a>                .state_catchup
 <a href=#1086 id=1086 data-nosnippet>1086</a>                .as_ref()
 <a href=#1087 id=1087 data-nosnippet>1087</a>                .remember_blocks_merkle_tree(
 <a href=#1088 id=1088 data-nosnippet>1088</a>                    instance_state,
@@ -1599,7 +1599,7 @@
 <a href=#1599 id=1599 data-nosnippet>1599</a>
 <a href=#1600 id=1600 data-nosnippet>1600</a>        <span class="comment">// Forget the state to trigger lookups in Header::new
 <a href=#1601 id=1601 data-nosnippet>1601</a>        </span><span class="kw">let </span>forgotten_state = parent_state.forget();
-<a href=#1602 id=1602 data-nosnippet>1602</a>        genesis_state.peers = Arc::new(MockStateCatchup::from_iter([(
+<a href=#1602 id=1602 data-nosnippet>1602</a>        genesis_state.state_catchup = Arc::new(MockStateCatchup::from_iter([(
 <a href=#1603 id=1603 data-nosnippet>1603</a>            parent_leaf.view_number(),
 <a href=#1604 id=1604 data-nosnippet>1604</a>            Arc::new(parent_state.clone()),
 <a href=#1605 id=1605 data-nosnippet>1605</a>        )]));
@@ -1647,7 +1647,7 @@
 <a href=#1647 id=1647 data-nosnippet>1647</a>        <span class="kw">let </span>_proposal_state = proposal_state
 <a href=#1648 id=1648 data-nosnippet>1648</a>            .apply_header(
 <a href=#1649 id=1649 data-nosnippet>1649</a>                <span class="kw-2">&amp;</span>genesis_state,
-<a href=#1650 id=1650 data-nosnippet>1650</a>                <span class="kw-2">&amp;</span>genesis_state.peers,
+<a href=#1650 id=1650 data-nosnippet>1650</a>                <span class="kw-2">&amp;</span>genesis_state.state_catchup,
 <a href=#1651 id=1651 data-nosnippet>1651</a>                <span class="kw-2">&amp;</span>parent_leaf,
 <a href=#1652 id=1652 data-nosnippet>1652</a>                <span class="kw-2">&amp;</span>proposal,
 <a href=#1653 id=1653 data-nosnippet>1653</a>                StaticVersion::&lt;<span class="number">0</span>, <span class="number">1</span>&gt;::version(),

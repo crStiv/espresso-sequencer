@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["erc1967proxy","esptoken","feecontract","iplonkverifier","lightclient","lightclientarbitrum","lightclientarbitrumv2","lightclientmock","lightclientv2","lightclientv2mock","permissionedstaketable","plonkverifier","plonkverifierv2","staketable"]};
+window.SIDEBAR_ITEMS = {"mod":["erc1967proxy","esptoken","feecontract","iplonkverifier","lightclient","lightclientarbitrum","lightclientarbitrumv2","lightclientmock","lightclientv2","lightclientv2mock","plonkverifier","plonkverifierv2","staketable","timelock"]};

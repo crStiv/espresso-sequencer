@@ -71,7 +71,7 @@
 <a href=#71 id=71 data-nosnippet>71</a>    </span><span class="kw">pub </span>output_event_stream: async_broadcast::Sender&lt;Event&lt;TYPES&gt;&gt;,
 <a href=#72 id=72 data-nosnippet>72</a>
 <a href=#73 id=73 data-nosnippet>73</a>    <span class="doccomment">/// This node's storage ref
-<a href=#74 id=74 data-nosnippet>74</a>    </span><span class="kw">pub </span>storage: Arc&lt;RwLock&lt;I::Storage&gt;&gt;,
+<a href=#74 id=74 data-nosnippet>74</a>    </span><span class="kw">pub </span>storage: I::Storage,
 <a href=#75 id=75 data-nosnippet>75</a>
 <a href=#76 id=76 data-nosnippet>76</a>    <span class="doccomment">/// Spawned tasks related to a specific view, so we can cancel them when
 <a href=#77 id=77 data-nosnippet>77</a>    /// they are stale
@@ -109,7 +109,7 @@
 <a href=#109 id=109 data-nosnippet>109</a>    </span><span class="kw">pub </span>output_event_stream: async_broadcast::Sender&lt;Event&lt;TYPES&gt;&gt;,
 <a href=#110 id=110 data-nosnippet>110</a>
 <a href=#111 id=111 data-nosnippet>111</a>    <span class="doccomment">/// This node's storage ref
-<a href=#112 id=112 data-nosnippet>112</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) storage: Arc&lt;RwLock&lt;I::Storage&gt;&gt;,
+<a href=#112 id=112 data-nosnippet>112</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) storage: I::Storage,
 <a href=#113 id=113 data-nosnippet>113</a>
 <a href=#114 id=114 data-nosnippet>114</a>    <span class="doccomment">/// Lock for a decided upgrade
 <a href=#115 id=115 data-nosnippet>115</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) upgrade_lock: UpgradeLock&lt;TYPES, V&gt;,
@@ -174,7 +174,7 @@
 <a href=#174 id=174 data-nosnippet>174</a>                    consensus: <span class="self">self</span>.consensus.clone(),
 <a href=#175 id=175 data-nosnippet>175</a>                    membership: epoch_membership,
 <a href=#176 id=176 data-nosnippet>176</a>                    output_event_stream: <span class="self">self</span>.output_event_stream.clone(),
-<a href=#177 id=177 data-nosnippet>177</a>                    storage: Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.storage),
+<a href=#177 id=177 data-nosnippet>177</a>                    storage: <span class="self">self</span>.storage.clone(),
 <a href=#178 id=178 data-nosnippet>178</a>                    upgrade_lock: <span class="self">self</span>.upgrade_lock.clone(),
 <a href=#179 id=179 data-nosnippet>179</a>                    epoch_height: <span class="self">self</span>.epoch_height,
 <a href=#180 id=180 data-nosnippet>180</a>                };

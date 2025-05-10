@@ -59,7 +59,7 @@
 <a href=#59 id=59 data-nosnippet>59</a>    </span><span class="kw">pub </span>hotshot: Arc&lt;SystemContext&lt;TYPES, I, V&gt;&gt;,
 <a href=#60 id=60 data-nosnippet>60</a>
 <a href=#61 id=61 data-nosnippet>61</a>    <span class="doccomment">/// Reference to the internal storage for consensus datum.
-<a href=#62 id=62 data-nosnippet>62</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) storage: Arc&lt;RwLock&lt;I::Storage&gt;&gt;,
+<a href=#62 id=62 data-nosnippet>62</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) storage: I::Storage,
 <a href=#63 id=63 data-nosnippet>63</a>
 <a href=#64 id=64 data-nosnippet>64</a>    <span class="doccomment">/// Networks used by the instance of hotshot
 <a href=#65 id=65 data-nosnippet>65</a>    </span><span class="kw">pub </span>network: Arc&lt;I::Network&gt;,
@@ -341,7 +341,7 @@
 <a href=#341 id=341 data-nosnippet>341</a>    <span class="doccomment">/// Provides a reference to the underlying storage for this [`SystemContext`], allowing access to
 <a href=#342 id=342 data-nosnippet>342</a>    /// historical data
 <a href=#343 id=343 data-nosnippet>343</a>    </span><span class="attr">#[must_use]
-<a href=#344 id=344 data-nosnippet>344</a>    </span><span class="kw">pub fn </span>storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;RwLock&lt;I::Storage&gt;&gt; {
-<a href=#345 id=345 data-nosnippet>345</a>        Arc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.storage)
+<a href=#344 id=344 data-nosnippet>344</a>    </span><span class="kw">pub fn </span>storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; I::Storage {
+<a href=#345 id=345 data-nosnippet>345</a>        <span class="self">self</span>.storage.clone()
 <a href=#346 id=346 data-nosnippet>346</a>    }
 <a href=#347 id=347 data-nosnippet>347</a>}</code></pre></div></section></main></body></html>

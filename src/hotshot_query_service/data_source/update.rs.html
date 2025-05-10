@@ -271,7 +271,7 @@
 <a href=#271 id=271 data-nosnippet>271</a>/// underlying storage, and are saved if the process restarts. It also allows pending changes to be
 <a href=#272 id=272 data-nosnippet>272</a>/// rolled back ([revert](Self::revert)) so that they are never written back to storage and are no
 <a href=#273 id=273 data-nosnippet>273</a>/// longer reflected even through the data source object which was used to make the changes.
-<a href=#274 id=274 data-nosnippet>274</a></span><span class="kw">pub trait </span>Transaction: Send + Sync {
+<a href=#274 id=274 data-nosnippet>274</a></span><span class="kw">pub trait </span>Transaction: Send + Sync + Sized {
 <a href=#275 id=275 data-nosnippet>275</a>    <span class="kw">fn </span>commit(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = anyhow::Result&lt;()&gt;&gt; + Send;
 <a href=#276 id=276 data-nosnippet>276</a>    <span class="kw">fn </span>revert(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Future + Send;
 <a href=#277 id=277 data-nosnippet>277</a>}</code></pre></div></section></main></body></html>

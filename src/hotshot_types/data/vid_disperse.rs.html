@@ -20,18 +20,18 @@
 <a href=#20 id=20 data-nosnippet>20</a>    impl_has_epoch,
 <a href=#21 id=21 data-nosnippet>21</a>    message::Proposal,
 <a href=#22 id=22 data-nosnippet>22</a>    simple_vote::HasEpoch,
-<a href=#23 id=23 data-nosnippet>23</a>    traits::{
-<a href=#24 id=24 data-nosnippet>24</a>        block_contents::EncodeBytes,
-<a href=#25 id=25 data-nosnippet>25</a>        node_implementation::NodeType,
-<a href=#26 id=26 data-nosnippet>26</a>        signature_key::{SignatureKey, StakeTableEntryType},
-<a href=#27 id=27 data-nosnippet>27</a>        BlockPayload,
-<a href=#28 id=28 data-nosnippet>28</a>    },
-<a href=#29 id=29 data-nosnippet>29</a>    vid::{
-<a href=#30 id=30 data-nosnippet>30</a>        advz::{advz_scheme, ADVZCommitment, ADVZCommon, ADVZScheme, ADVZShare},
-<a href=#31 id=31 data-nosnippet>31</a>        avidm::{init_avidm_param, AvidMCommitment, AvidMCommon, AvidMScheme, AvidMShare},
-<a href=#32 id=32 data-nosnippet>32</a>    },
-<a href=#33 id=33 data-nosnippet>33</a>    vote::HasViewNumber,
-<a href=#34 id=34 data-nosnippet>34</a>    PeerConfig,
+<a href=#23 id=23 data-nosnippet>23</a>    stake_table::HSStakeTable,
+<a href=#24 id=24 data-nosnippet>24</a>    traits::{
+<a href=#25 id=25 data-nosnippet>25</a>        block_contents::EncodeBytes,
+<a href=#26 id=26 data-nosnippet>26</a>        node_implementation::NodeType,
+<a href=#27 id=27 data-nosnippet>27</a>        signature_key::{SignatureKey, StakeTableEntryType},
+<a href=#28 id=28 data-nosnippet>28</a>        BlockPayload,
+<a href=#29 id=29 data-nosnippet>29</a>    },
+<a href=#30 id=30 data-nosnippet>30</a>    vid::{
+<a href=#31 id=31 data-nosnippet>31</a>        advz::{advz_scheme, ADVZCommitment, ADVZCommon, ADVZScheme, ADVZShare},
+<a href=#32 id=32 data-nosnippet>32</a>        avidm::{init_avidm_param, AvidMCommitment, AvidMCommon, AvidMScheme, AvidMShare},
+<a href=#33 id=33 data-nosnippet>33</a>    },
+<a href=#34 id=34 data-nosnippet>34</a>    vote::HasViewNumber,
 <a href=#35 id=35 data-nosnippet>35</a>};
 <a href=#36 id=36 data-nosnippet>36</a>
 <a href=#37 id=37 data-nosnippet>37</a><span class="macro">impl_has_epoch!</span>(
@@ -292,7 +292,7 @@
 <a href=#292 id=292 data-nosnippet>292</a>}
 <a href=#293 id=293 data-nosnippet>293</a>
 <a href=#294 id=294 data-nosnippet>294</a><span class="kw">pub fn </span>vid_total_weight&lt;TYPES: NodeType&gt;(
-<a href=#295 id=295 data-nosnippet>295</a>    stake_table: Vec&lt;PeerConfig&lt;TYPES&gt;&gt;,
+<a href=#295 id=295 data-nosnippet>295</a>    stake_table: <span class="kw-2">&amp;</span>HSStakeTable&lt;TYPES&gt;,
 <a href=#296 id=296 data-nosnippet>296</a>    epoch: <span class="prelude-ty">Option</span>&lt;TYPES::Epoch&gt;,
 <a href=#297 id=297 data-nosnippet>297</a>) -&gt; usize {
 <a href=#298 id=298 data-nosnippet>298</a>    <span class="kw">if </span>epoch.is_none() {
@@ -307,7 +307,7 @@
 <a href=#307 id=307 data-nosnippet>307</a>    }
 <a href=#308 id=308 data-nosnippet>308</a>}
 <a href=#309 id=309 data-nosnippet>309</a>
-<a href=#310 id=310 data-nosnippet>310</a><span class="kw">fn </span>approximate_weights&lt;TYPES: NodeType&gt;(stake_table: Vec&lt;PeerConfig&lt;TYPES&gt;&gt;) -&gt; Weights {
+<a href=#310 id=310 data-nosnippet>310</a><span class="kw">fn </span>approximate_weights&lt;TYPES: NodeType&gt;(stake_table: <span class="kw-2">&amp;</span>HSStakeTable&lt;TYPES&gt;) -&gt; Weights {
 <a href=#311 id=311 data-nosnippet>311</a>    <span class="kw">let </span>total_stake = stake_table.iter().fold(U256::ZERO, |acc, entry| {
 <a href=#312 id=312 data-nosnippet>312</a>        acc + entry.stake_table_entry.stake()
 <a href=#313 id=313 data-nosnippet>313</a>    });
@@ -408,7 +408,7 @@
 <a href=#408 id=408 data-nosnippet>408</a>    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
 <a href=#409 id=409 data-nosnippet>409</a>        <span class="kw">let </span>target_mem = membership.membership_for_epoch(target_epoch).<span class="kw">await</span><span class="question-mark">?</span>;
 <a href=#410 id=410 data-nosnippet>410</a>        <span class="kw">let </span>stake_table = target_mem.stake_table().<span class="kw">await</span>;
-<a href=#411 id=411 data-nosnippet>411</a>        <span class="kw">let </span>approximate_weights = approximate_weights(stake_table);
+<a href=#411 id=411 data-nosnippet>411</a>        <span class="kw">let </span>approximate_weights = approximate_weights(<span class="kw-2">&amp;</span>stake_table);
 <a href=#412 id=412 data-nosnippet>412</a>
 <a href=#413 id=413 data-nosnippet>413</a>        <span class="kw">let </span>txns = payload.encode();
 <a href=#414 id=414 data-nosnippet>414</a>        <span class="kw">let </span>num_txns = txns.len();

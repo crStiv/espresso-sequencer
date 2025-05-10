@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["CombinedNetworks","UnderlyingCombinedNetworks"],"type":["DelayedTasksChannelsMap"]};
+window.SIDEBAR_ITEMS = {"struct":["CombinedNetworks","MessageDeduplicationCache","UnderlyingCombinedNetworks"],"type":["DelayedTasksChannelsMap"]};

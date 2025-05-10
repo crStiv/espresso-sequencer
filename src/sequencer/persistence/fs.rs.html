@@ -40,7 +40,7 @@
 <a href=#40 id=40 data-nosnippet>40</a><span class="kw">use </span>indexmap::IndexMap;
 <a href=#41 id=41 data-nosnippet>41</a><span class="kw">use </span>itertools::Itertools;
 <a href=#42 id=42 data-nosnippet>42</a>
-<a href=#43 id=43 data-nosnippet>43</a><span class="kw">use </span><span class="kw">crate</span>::ViewNumber;
+<a href=#43 id=43 data-nosnippet>43</a><span class="kw">use crate</span>::{ViewNumber, RECENT_STAKE_TABLES_LIMIT};
 <a href=#44 id=44 data-nosnippet>44</a>
 <a href=#45 id=45 data-nosnippet>45</a><span class="doccomment">/// Options for file system backed persistence.
 <a href=#46 id=46 data-nosnippet>46</a></span><span class="attr">#[derive(Parser, Clone, Debug)]
@@ -1348,76 +1348,76 @@
 <a href=#1348 id=1348 data-nosnippet>1348</a>
 <a href=#1349 id=1349 data-nosnippet>1349</a>        result.sort_by(|a, b| a.epoch.cmp(<span class="kw-2">&amp;</span>b.epoch));
 <a href=#1350 id=1350 data-nosnippet>1350</a>
-<a href=#1351 id=1351 data-nosnippet>1351</a>        <span class="prelude-val">Ok</span>(result)
-<a href=#1352 id=1352 data-nosnippet>1352</a>    }
-<a href=#1353 id=1353 data-nosnippet>1353</a>
-<a href=#1354 id=1354 data-nosnippet>1354</a>    <span class="kw">async fn </span>load_state_cert(
-<a href=#1355 id=1355 data-nosnippet>1355</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#1356 id=1356 data-nosnippet>1356</a>    ) -&gt; anyhow::Result&lt;<span class="prelude-ty">Option</span>&lt;LightClientStateUpdateCertificate&lt;SeqTypes&gt;&gt;&gt; {
-<a href=#1357 id=1357 data-nosnippet>1357</a>        <span class="kw">let </span>inner = <span class="self">self</span>.inner.read().<span class="kw">await</span>;
-<a href=#1358 id=1358 data-nosnippet>1358</a>        <span class="kw">let </span>dir_path = inner.finalized_state_cert_dir_path();
+<a href=#1351 id=1351 data-nosnippet>1351</a>        <span class="comment">// Keep only the most recent epochs
+<a href=#1352 id=1352 data-nosnippet>1352</a>        </span><span class="kw">let </span>start = result
+<a href=#1353 id=1353 data-nosnippet>1353</a>            .len()
+<a href=#1354 id=1354 data-nosnippet>1354</a>            .saturating_sub(RECENT_STAKE_TABLES_LIMIT <span class="kw">as </span>usize);
+<a href=#1355 id=1355 data-nosnippet>1355</a>        <span class="kw">let </span>recent = result[start..].to_vec();
+<a href=#1356 id=1356 data-nosnippet>1356</a>
+<a href=#1357 id=1357 data-nosnippet>1357</a>        <span class="prelude-val">Ok</span>(recent)
+<a href=#1358 id=1358 data-nosnippet>1358</a>    }
 <a href=#1359 id=1359 data-nosnippet>1359</a>
-<a href=#1360 id=1360 data-nosnippet>1360</a>        <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="prelude-val">None</span>;
-<a href=#1361 id=1361 data-nosnippet>1361</a>
-<a href=#1362 id=1362 data-nosnippet>1362</a>        <span class="kw">if </span>!dir_path.is_dir() {
-<a href=#1363 id=1363 data-nosnippet>1363</a>            <span class="kw">return </span><span class="prelude-val">Ok</span>(result);
-<a href=#1364 id=1364 data-nosnippet>1364</a>        }
-<a href=#1365 id=1365 data-nosnippet>1365</a>        <span class="kw">for </span>(epoch, path) <span class="kw">in </span>epoch_files(dir_path)<span class="question-mark">? </span>{
-<a href=#1366 id=1366 data-nosnippet>1366</a>            <span class="kw">if </span>result.as_ref().is_some_and(|cert| epoch &lt;= cert.epoch) {
-<a href=#1367 id=1367 data-nosnippet>1367</a>                <span class="kw">continue</span>;
-<a href=#1368 id=1368 data-nosnippet>1368</a>            }
-<a href=#1369 id=1369 data-nosnippet>1369</a>            <span class="kw">let </span>bytes = fs::read(<span class="kw-2">&amp;</span>path).context(<span class="macro">format!</span>(
-<a href=#1370 id=1370 data-nosnippet>1370</a>                <span class="string">"reading light client state update certificate {}"</span>,
-<a href=#1371 id=1371 data-nosnippet>1371</a>                path.display()
-<a href=#1372 id=1372 data-nosnippet>1372</a>            ))<span class="question-mark">?</span>;
-<a href=#1373 id=1373 data-nosnippet>1373</a>            result = <span class="prelude-val">Some</span>(
-<a href=#1374 id=1374 data-nosnippet>1374</a>                bincode::deserialize::&lt;LightClientStateUpdateCertificate&lt;SeqTypes&gt;&gt;(<span class="kw-2">&amp;</span>bytes)
-<a href=#1375 id=1375 data-nosnippet>1375</a>                    .context(<span class="macro">format!</span>(
-<a href=#1376 id=1376 data-nosnippet>1376</a>                        <span class="string">"parsing light client state update certificate {}"</span>,
-<a href=#1377 id=1377 data-nosnippet>1377</a>                        path.display()
-<a href=#1378 id=1378 data-nosnippet>1378</a>                    ))<span class="question-mark">?</span>,
-<a href=#1379 id=1379 data-nosnippet>1379</a>            );
-<a href=#1380 id=1380 data-nosnippet>1380</a>        }
-<a href=#1381 id=1381 data-nosnippet>1381</a>
-<a href=#1382 id=1382 data-nosnippet>1382</a>        <span class="prelude-val">Ok</span>(result)
-<a href=#1383 id=1383 data-nosnippet>1383</a>    }
-<a href=#1384 id=1384 data-nosnippet>1384</a>}
-<a href=#1385 id=1385 data-nosnippet>1385</a>
-<a href=#1386 id=1386 data-nosnippet>1386</a><span class="attr">#[async_trait]
-<a href=#1387 id=1387 data-nosnippet>1387</a></span><span class="kw">impl </span>MembershipPersistence <span class="kw">for </span>Persistence {
-<a href=#1388 id=1388 data-nosnippet>1388</a>    <span class="kw">async fn </span>load_stake(
-<a href=#1389 id=1389 data-nosnippet>1389</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#1390 id=1390 data-nosnippet>1390</a>        epoch: EpochNumber,
-<a href=#1391 id=1391 data-nosnippet>1391</a>    ) -&gt; anyhow::Result&lt;<span class="prelude-ty">Option</span>&lt;IndexMap&lt;alloy::primitives::Address, Validator&lt;BLSPubKey&gt;&gt;&gt;&gt; {
-<a href=#1392 id=1392 data-nosnippet>1392</a>        <span class="kw">let </span>inner = <span class="self">self</span>.inner.read().<span class="kw">await</span>;
-<a href=#1393 id=1393 data-nosnippet>1393</a>        <span class="kw">let </span>path = <span class="kw-2">&amp;</span>inner.stake_table_dir_path();
-<a href=#1394 id=1394 data-nosnippet>1394</a>        <span class="kw">let </span>file_path = path.join(epoch.to_string()).with_extension(<span class="string">"txt"</span>);
-<a href=#1395 id=1395 data-nosnippet>1395</a>        <span class="kw">let </span>bytes = fs::read(<span class="kw-2">&amp;</span>file_path).context(<span class="string">"read"</span>)<span class="question-mark">?</span>;
-<a href=#1396 id=1396 data-nosnippet>1396</a>        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(
-<a href=#1397 id=1397 data-nosnippet>1397</a>            bincode::deserialize(<span class="kw-2">&amp;</span>bytes).context(<span class="string">"deserialize combined stake table"</span>)<span class="question-mark">?</span>,
-<a href=#1398 id=1398 data-nosnippet>1398</a>        ))
-<a href=#1399 id=1399 data-nosnippet>1399</a>    }
-<a href=#1400 id=1400 data-nosnippet>1400</a>
-<a href=#1401 id=1401 data-nosnippet>1401</a>    <span class="kw">async fn </span>load_latest_stake(<span class="kw-2">&amp;</span><span class="self">self</span>, limit: u64) -&gt; anyhow::Result&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;IndexedStake&gt;&gt;&gt; {
-<a href=#1402 id=1402 data-nosnippet>1402</a>        <span class="kw">let </span>limit = limit <span class="kw">as </span>usize;
-<a href=#1403 id=1403 data-nosnippet>1403</a>        <span class="kw">let </span>inner = <span class="self">self</span>.inner.read().<span class="kw">await</span>;
-<a href=#1404 id=1404 data-nosnippet>1404</a>        <span class="kw">let </span>path = <span class="kw-2">&amp;</span>inner.stake_table_dir_path();
-<a href=#1405 id=1405 data-nosnippet>1405</a>        <span class="kw">let </span>sorted: Vec&lt;<span class="kw">_</span>&gt; = epoch_files(path)<span class="question-mark">?
-<a href=#1406 id=1406 data-nosnippet>1406</a>            </span>.sorted_unstable_by_key(|t| t.<span class="number">0</span>)
-<a href=#1407 id=1407 data-nosnippet>1407</a>            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-<a href=#1408 id=1408 data-nosnippet>1408</a>
-<a href=#1409 id=1409 data-nosnippet>1409</a>        <span class="kw">let </span>len = sorted.len();
-<a href=#1410 id=1410 data-nosnippet>1410</a>        <span class="kw">let </span><span class="kw-2">mut </span>slice = <span class="kw-2">&amp;</span>sorted[..];
-<a href=#1411 id=1411 data-nosnippet>1411</a>        <span class="kw">if </span>len &gt; limit {
-<a href=#1412 id=1412 data-nosnippet>1412</a>            slice = <span class="kw-2">&amp;</span>sorted[len - limit..len - <span class="number">1</span>]
-<a href=#1413 id=1413 data-nosnippet>1413</a>        };
-<a href=#1414 id=1414 data-nosnippet>1414</a>        slice
-<a href=#1415 id=1415 data-nosnippet>1415</a>            .iter()
+<a href=#1360 id=1360 data-nosnippet>1360</a>    <span class="kw">async fn </span>load_state_cert(
+<a href=#1361 id=1361 data-nosnippet>1361</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#1362 id=1362 data-nosnippet>1362</a>    ) -&gt; anyhow::Result&lt;<span class="prelude-ty">Option</span>&lt;LightClientStateUpdateCertificate&lt;SeqTypes&gt;&gt;&gt; {
+<a href=#1363 id=1363 data-nosnippet>1363</a>        <span class="kw">let </span>inner = <span class="self">self</span>.inner.read().<span class="kw">await</span>;
+<a href=#1364 id=1364 data-nosnippet>1364</a>        <span class="kw">let </span>dir_path = inner.finalized_state_cert_dir_path();
+<a href=#1365 id=1365 data-nosnippet>1365</a>
+<a href=#1366 id=1366 data-nosnippet>1366</a>        <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="prelude-val">None</span>;
+<a href=#1367 id=1367 data-nosnippet>1367</a>
+<a href=#1368 id=1368 data-nosnippet>1368</a>        <span class="kw">if </span>!dir_path.is_dir() {
+<a href=#1369 id=1369 data-nosnippet>1369</a>            <span class="kw">return </span><span class="prelude-val">Ok</span>(result);
+<a href=#1370 id=1370 data-nosnippet>1370</a>        }
+<a href=#1371 id=1371 data-nosnippet>1371</a>        <span class="kw">for </span>(epoch, path) <span class="kw">in </span>epoch_files(dir_path)<span class="question-mark">? </span>{
+<a href=#1372 id=1372 data-nosnippet>1372</a>            <span class="kw">if </span>result.as_ref().is_some_and(|cert| epoch &lt;= cert.epoch) {
+<a href=#1373 id=1373 data-nosnippet>1373</a>                <span class="kw">continue</span>;
+<a href=#1374 id=1374 data-nosnippet>1374</a>            }
+<a href=#1375 id=1375 data-nosnippet>1375</a>            <span class="kw">let </span>bytes = fs::read(<span class="kw-2">&amp;</span>path).context(<span class="macro">format!</span>(
+<a href=#1376 id=1376 data-nosnippet>1376</a>                <span class="string">"reading light client state update certificate {}"</span>,
+<a href=#1377 id=1377 data-nosnippet>1377</a>                path.display()
+<a href=#1378 id=1378 data-nosnippet>1378</a>            ))<span class="question-mark">?</span>;
+<a href=#1379 id=1379 data-nosnippet>1379</a>            result = <span class="prelude-val">Some</span>(
+<a href=#1380 id=1380 data-nosnippet>1380</a>                bincode::deserialize::&lt;LightClientStateUpdateCertificate&lt;SeqTypes&gt;&gt;(<span class="kw-2">&amp;</span>bytes)
+<a href=#1381 id=1381 data-nosnippet>1381</a>                    .context(<span class="macro">format!</span>(
+<a href=#1382 id=1382 data-nosnippet>1382</a>                        <span class="string">"parsing light client state update certificate {}"</span>,
+<a href=#1383 id=1383 data-nosnippet>1383</a>                        path.display()
+<a href=#1384 id=1384 data-nosnippet>1384</a>                    ))<span class="question-mark">?</span>,
+<a href=#1385 id=1385 data-nosnippet>1385</a>            );
+<a href=#1386 id=1386 data-nosnippet>1386</a>        }
+<a href=#1387 id=1387 data-nosnippet>1387</a>
+<a href=#1388 id=1388 data-nosnippet>1388</a>        <span class="prelude-val">Ok</span>(result)
+<a href=#1389 id=1389 data-nosnippet>1389</a>    }
+<a href=#1390 id=1390 data-nosnippet>1390</a>}
+<a href=#1391 id=1391 data-nosnippet>1391</a>
+<a href=#1392 id=1392 data-nosnippet>1392</a><span class="attr">#[async_trait]
+<a href=#1393 id=1393 data-nosnippet>1393</a></span><span class="kw">impl </span>MembershipPersistence <span class="kw">for </span>Persistence {
+<a href=#1394 id=1394 data-nosnippet>1394</a>    <span class="kw">async fn </span>load_stake(
+<a href=#1395 id=1395 data-nosnippet>1395</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#1396 id=1396 data-nosnippet>1396</a>        epoch: EpochNumber,
+<a href=#1397 id=1397 data-nosnippet>1397</a>    ) -&gt; anyhow::Result&lt;<span class="prelude-ty">Option</span>&lt;IndexMap&lt;alloy::primitives::Address, Validator&lt;BLSPubKey&gt;&gt;&gt;&gt; {
+<a href=#1398 id=1398 data-nosnippet>1398</a>        <span class="kw">let </span>inner = <span class="self">self</span>.inner.read().<span class="kw">await</span>;
+<a href=#1399 id=1399 data-nosnippet>1399</a>        <span class="kw">let </span>path = <span class="kw-2">&amp;</span>inner.stake_table_dir_path();
+<a href=#1400 id=1400 data-nosnippet>1400</a>        <span class="kw">let </span>file_path = path.join(epoch.to_string()).with_extension(<span class="string">"txt"</span>);
+<a href=#1401 id=1401 data-nosnippet>1401</a>        <span class="kw">let </span>bytes = fs::read(<span class="kw-2">&amp;</span>file_path).context(<span class="string">"read"</span>)<span class="question-mark">?</span>;
+<a href=#1402 id=1402 data-nosnippet>1402</a>        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(
+<a href=#1403 id=1403 data-nosnippet>1403</a>            bincode::deserialize(<span class="kw-2">&amp;</span>bytes).context(<span class="string">"deserialize combined stake table"</span>)<span class="question-mark">?</span>,
+<a href=#1404 id=1404 data-nosnippet>1404</a>        ))
+<a href=#1405 id=1405 data-nosnippet>1405</a>    }
+<a href=#1406 id=1406 data-nosnippet>1406</a>
+<a href=#1407 id=1407 data-nosnippet>1407</a>    <span class="kw">async fn </span>load_latest_stake(<span class="kw-2">&amp;</span><span class="self">self</span>, limit: u64) -&gt; anyhow::Result&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;IndexedStake&gt;&gt;&gt; {
+<a href=#1408 id=1408 data-nosnippet>1408</a>        <span class="kw">let </span>limit = limit <span class="kw">as </span>usize;
+<a href=#1409 id=1409 data-nosnippet>1409</a>        <span class="kw">let </span>inner = <span class="self">self</span>.inner.read().<span class="kw">await</span>;
+<a href=#1410 id=1410 data-nosnippet>1410</a>        <span class="kw">let </span>path = <span class="kw-2">&amp;</span>inner.stake_table_dir_path();
+<a href=#1411 id=1411 data-nosnippet>1411</a>        <span class="kw">let </span>sorted = epoch_files(<span class="kw-2">&amp;</span>path)<span class="question-mark">?
+<a href=#1412 id=1412 data-nosnippet>1412</a>            </span>.sorted_by(|(e1, <span class="kw">_</span>), (e2, <span class="kw">_</span>)| e2.cmp(e1))
+<a href=#1413 id=1413 data-nosnippet>1413</a>            .take(limit);
+<a href=#1414 id=1414 data-nosnippet>1414</a>
+<a href=#1415 id=1415 data-nosnippet>1415</a>        sorted
 <a href=#1416 id=1416 data-nosnippet>1416</a>            .map(|(epoch, path)| -&gt; anyhow::Result&lt;<span class="prelude-ty">Option</span>&lt;IndexedStake&gt;&gt; {
 <a href=#1417 id=1417 data-nosnippet>1417</a>                <span class="kw">let </span>bytes = fs::read(path).context(<span class="string">"read"</span>)<span class="question-mark">?</span>;
 <a href=#1418 id=1418 data-nosnippet>1418</a>                <span class="kw">let </span>st =
 <a href=#1419 id=1419 data-nosnippet>1419</a>                    bincode::deserialize(<span class="kw-2">&amp;</span>bytes).context(<span class="string">"deserialize combined stake table"</span>)<span class="question-mark">?</span>;
-<a href=#1420 id=1420 data-nosnippet>1420</a>                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((<span class="kw-2">*</span>epoch, st)))
+<a href=#1420 id=1420 data-nosnippet>1420</a>                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((epoch, st)))
 <a href=#1421 id=1421 data-nosnippet>1421</a>            })
 <a href=#1422 id=1422 data-nosnippet>1422</a>            .collect()
 <a href=#1423 id=1423 data-nosnippet>1423</a>    }
@@ -2124,39 +2124,4 @@
 <a href=#2124 id=2124 data-nosnippet>2124</a>                .collect::&lt;BTreeMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()
 <a href=#2125 id=2125 data-nosnippet>2125</a>        );
 <a href=#2126 id=2126 data-nosnippet>2126</a>    }
-<a href=#2127 id=2127 data-nosnippet>2127</a>
-<a href=#2128 id=2128 data-nosnippet>2128</a>    <span class="attr">#[tokio::test(flavor = <span class="string">"multi_thread"</span>)]
-<a href=#2129 id=2129 data-nosnippet>2129</a>    </span><span class="kw">async fn </span>test_membership_persistence() -&gt; anyhow::Result&lt;()&gt; {
-<a href=#2130 id=2130 data-nosnippet>2130</a>        setup_test();
-<a href=#2131 id=2131 data-nosnippet>2131</a>
-<a href=#2132 id=2132 data-nosnippet>2132</a>        <span class="kw">let </span>tmp = Persistence::tmp_storage().<span class="kw">await</span>;
-<a href=#2133 id=2133 data-nosnippet>2133</a>        <span class="kw">let </span><span class="kw-2">mut </span>opt = Persistence::options(<span class="kw-2">&amp;</span>tmp);
-<a href=#2134 id=2134 data-nosnippet>2134</a>
-<a href=#2135 id=2135 data-nosnippet>2135</a>        <span class="kw">let </span>storage = opt.create().<span class="kw">await</span>.unwrap();
-<a href=#2136 id=2136 data-nosnippet>2136</a>
-<a href=#2137 id=2137 data-nosnippet>2137</a>        <span class="kw">let </span>validator = Validator::mock();
-<a href=#2138 id=2138 data-nosnippet>2138</a>        <span class="kw">let </span><span class="kw-2">mut </span>st = IndexMap::new();
-<a href=#2139 id=2139 data-nosnippet>2139</a>        st.insert(validator.account, validator);
-<a href=#2140 id=2140 data-nosnippet>2140</a>        storage
-<a href=#2141 id=2141 data-nosnippet>2141</a>            .store_stake(EpochNumber::new(<span class="number">10</span>), st.clone())
-<a href=#2142 id=2142 data-nosnippet>2142</a>            .<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#2143 id=2143 data-nosnippet>2143</a>
-<a href=#2144 id=2144 data-nosnippet>2144</a>        <span class="kw">let </span>table = storage.load_stake(EpochNumber::new(<span class="number">10</span>)).<span class="kw">await</span><span class="question-mark">?</span>.unwrap();
-<a href=#2145 id=2145 data-nosnippet>2145</a>        <span class="macro">assert_eq!</span>(st, table);
-<a href=#2146 id=2146 data-nosnippet>2146</a>
-<a href=#2147 id=2147 data-nosnippet>2147</a>        <span class="kw">let </span>val2 = Validator::mock();
-<a href=#2148 id=2148 data-nosnippet>2148</a>        <span class="kw">let </span><span class="kw-2">mut </span>st2 = IndexMap::new();
-<a href=#2149 id=2149 data-nosnippet>2149</a>        st2.insert(val2.account, val2);
-<a href=#2150 id=2150 data-nosnippet>2150</a>        storage
-<a href=#2151 id=2151 data-nosnippet>2151</a>            .store_stake(EpochNumber::new(<span class="number">11</span>), st2.clone())
-<a href=#2152 id=2152 data-nosnippet>2152</a>            .<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#2153 id=2153 data-nosnippet>2153</a>
-<a href=#2154 id=2154 data-nosnippet>2154</a>        <span class="kw">let </span>tables = storage.load_latest_stake(<span class="number">4</span>).<span class="kw">await</span><span class="question-mark">?</span>.unwrap();
-<a href=#2155 id=2155 data-nosnippet>2155</a>        <span class="kw">let </span><span class="kw-2">mut </span>iter = tables.iter();
-<a href=#2156 id=2156 data-nosnippet>2156</a>        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>(EpochNumber::new(<span class="number">10</span>), st)), iter.next());
-<a href=#2157 id=2157 data-nosnippet>2157</a>        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>(EpochNumber::new(<span class="number">11</span>), st2)), iter.next());
-<a href=#2158 id=2158 data-nosnippet>2158</a>        <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, iter.next());
-<a href=#2159 id=2159 data-nosnippet>2159</a>
-<a href=#2160 id=2160 data-nosnippet>2160</a>        <span class="prelude-val">Ok</span>(())
-<a href=#2161 id=2161 data-nosnippet>2161</a>    }
-<a href=#2162 id=2162 data-nosnippet>2162</a>}</code></pre></div></section></main></body></html>
+<a href=#2127 id=2127 data-nosnippet>2127</a>}</code></pre></div></section></main></body></html>

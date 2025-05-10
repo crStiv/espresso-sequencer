@@ -41,8 +41,8 @@
 <a href=#41 id=41 data-nosnippet>41</a>    <span class="kw">let </span>schnorr_vk_sol: EdOnBN254PointSol = schnorr_vk.to_affine().into();
 <a href=#42 id=42 data-nosnippet>42</a>    <span class="prelude-val">Ok</span>(stake_table
 <a href=#43 id=43 data-nosnippet>43</a>        .registerValidator(
-<a href=#44 id=44 data-nosnippet>44</a>            bls_vk_sol.into(),
-<a href=#45 id=45 data-nosnippet>45</a>            schnorr_vk_sol.into(),
+<a href=#44 id=44 data-nosnippet>44</a>            bls_vk_sol,
+<a href=#45 id=45 data-nosnippet>45</a>            schnorr_vk_sol,
 <a href=#46 id=46 data-nosnippet>46</a>            sig_sol.into(),
 <a href=#47 id=47 data-nosnippet>47</a>            commission.to_evm(),
 <a href=#48 id=48 data-nosnippet>48</a>        )
@@ -64,7 +64,7 @@
 <a href=#64 id=64 data-nosnippet>64</a>    <span class="kw">let </span>(bls_vk_sol, sig_sol) = prepare_bls_payload(<span class="kw-2">&amp;</span>bls_key_pair, validator_address);
 <a href=#65 id=65 data-nosnippet>65</a>    <span class="kw">let </span>schnorr_vk_sol: EdOnBN254PointSol = schnorr_vk.to_affine().into();
 <a href=#66 id=66 data-nosnippet>66</a>    <span class="prelude-val">Ok</span>(stake_table
-<a href=#67 id=67 data-nosnippet>67</a>        .updateConsensusKeys(bls_vk_sol.into(), schnorr_vk_sol.into(), sig_sol.into())
+<a href=#67 id=67 data-nosnippet>67</a>        .updateConsensusKeys(bls_vk_sol, schnorr_vk_sol, sig_sol.into())
 <a href=#68 id=68 data-nosnippet>68</a>        .send()
 <a href=#69 id=69 data-nosnippet>69</a>        .<span class="kw">await
 <a href=#70 id=70 data-nosnippet>70</a>        </span>.maybe_decode_revert::&lt;StakeTableErrors&gt;()<span class="question-mark">?
@@ -118,8 +118,8 @@
 <a href=#118 id=118 data-nosnippet>118</a>        <span class="macro">assert_eq!</span>(event.account, validator_address);
 <a href=#119 id=119 data-nosnippet>119</a>        <span class="macro">assert_eq!</span>(event.commission, system.commission.to_evm());
 <a href=#120 id=120 data-nosnippet>120</a>
-<a href=#121 id=121 data-nosnippet>121</a>        <span class="macro">assert_eq!</span>(event.blsVk, bls_vk_sol.into());
-<a href=#122 id=122 data-nosnippet>122</a>        <span class="macro">assert_eq!</span>(event.schnorrVk, schnorr_vk_sol.into());
+<a href=#121 id=121 data-nosnippet>121</a>        <span class="macro">assert_eq!</span>(event.blsVk, bls_vk_sol);
+<a href=#122 id=122 data-nosnippet>122</a>        <span class="macro">assert_eq!</span>(event.schnorrVk, schnorr_vk_sol);
 <a href=#123 id=123 data-nosnippet>123</a>
 <a href=#124 id=124 data-nosnippet>124</a>        <span class="comment">// TODO verify we can parse keys and verify signature
 <a href=#125 id=125 data-nosnippet>125</a>        </span><span class="prelude-val">Ok</span>(())
@@ -164,8 +164,8 @@
 <a href=#164 id=164 data-nosnippet>164</a>            .unwrap();
 <a href=#165 id=165 data-nosnippet>165</a>        <span class="macro">assert_eq!</span>(event.account, system.deployer_address);
 <a href=#166 id=166 data-nosnippet>166</a>
-<a href=#167 id=167 data-nosnippet>167</a>        <span class="macro">assert_eq!</span>(event.blsVK, bls_vk_sol.into());
-<a href=#168 id=168 data-nosnippet>168</a>        <span class="macro">assert_eq!</span>(event.schnorrVK, schnorr_vk_sol.into());
+<a href=#167 id=167 data-nosnippet>167</a>        <span class="macro">assert_eq!</span>(event.blsVK, bls_vk_sol);
+<a href=#168 id=168 data-nosnippet>168</a>        <span class="macro">assert_eq!</span>(event.schnorrVK, schnorr_vk_sol);
 <a href=#169 id=169 data-nosnippet>169</a>
 <a href=#170 id=170 data-nosnippet>170</a>        <span class="prelude-val">Ok</span>(())
 <a href=#171 id=171 data-nosnippet>171</a>    }

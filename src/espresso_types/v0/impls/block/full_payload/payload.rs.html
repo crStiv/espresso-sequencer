@@ -148,7 +148,7 @@
 <a href=#148 id=148 data-nosnippet>148</a>            <span class="kw">match </span>validated_state_cf.resolve() {
 <a href=#149 id=149 data-nosnippet>149</a>                <span class="prelude-val">Some</span>(cf) =&gt; cf,
 <a href=#150 id=150 data-nosnippet>150</a>                <span class="prelude-val">None </span>=&gt; instance_state
-<a href=#151 id=151 data-nosnippet>151</a>                    .peers
+<a href=#151 id=151 data-nosnippet>151</a>                    .state_catchup
 <a href=#152 id=152 data-nosnippet>152</a>                    .as_ref()
 <a href=#153 id=153 data-nosnippet>153</a>                    .fetch_chain_config(validated_state_cf.commit())
 <a href=#154 id=154 data-nosnippet>154</a>                    .<span class="kw">await

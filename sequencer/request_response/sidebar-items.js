@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["data_source","network","recipient_source","request"]};
+window.SIDEBAR_ITEMS = {"mod":["catchup","data_source","network","recipient_source","request"],"struct":["RequestResponseProtocol"]};

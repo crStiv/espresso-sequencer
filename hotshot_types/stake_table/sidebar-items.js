@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["StakeTableEntry"]};
+window.SIDEBAR_ITEMS = {"fn":["one_honest_threshold","u256_to_field"],"struct":["HSStakeTable","StakeTableEntries","StakeTableEntry"]};

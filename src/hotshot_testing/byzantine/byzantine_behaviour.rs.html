@@ -345,7 +345,7 @@
 <a href=#345 id=345 data-nosnippet>345</a>            view: TYPES::View::genesis(),
 <a href=#346 id=346 data-nosnippet>346</a>            epoch: <span class="prelude-val">None</span>,
 <a href=#347 id=347 data-nosnippet>347</a>            membership_coordinator: handle.membership_coordinator.clone(),
-<a href=#348 id=348 data-nosnippet>348</a>            storage: Arc::clone(<span class="kw-2">&amp;</span>handle.storage()),
+<a href=#348 id=348 data-nosnippet>348</a>            storage: handle.storage(),
 <a href=#349 id=349 data-nosnippet>349</a>            consensus: OuterConsensus::new(handle.consensus()),
 <a href=#350 id=350 data-nosnippet>350</a>            upgrade_lock: handle.hotshot.upgrade_lock.clone(),
 <a href=#351 id=351 data-nosnippet>351</a>            transmit_tasks: BTreeMap::new(),

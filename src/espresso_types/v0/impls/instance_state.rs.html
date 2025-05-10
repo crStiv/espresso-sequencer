@@ -38,8 +38,8 @@
 <a href=#38 id=38 data-nosnippet>38</a>    <span class="kw">pub </span>node_id: u64,
 <a href=#39 id=39 data-nosnippet>39</a>    <span class="kw">pub </span>chain_config: <span class="kw">crate</span>::v0_99::ChainConfig,
 <a href=#40 id=40 data-nosnippet>40</a>    <span class="kw">pub </span>l1_client: L1Client,
-<a href=#41 id=41 data-nosnippet>41</a>    <span class="attr">#[debug(<span class="string">"{}"</span>, peers.name())]
-<a href=#42 id=42 data-nosnippet>42</a>    </span><span class="kw">pub </span>peers: Arc&lt;<span class="kw">dyn </span>StateCatchup&gt;,
+<a href=#41 id=41 data-nosnippet>41</a>    <span class="attr">#[debug(<span class="string">"{}"</span>, state_catchup.name())]
+<a href=#42 id=42 data-nosnippet>42</a>    </span><span class="kw">pub </span>state_catchup: Arc&lt;<span class="kw">dyn </span>StateCatchup&gt;,
 <a href=#43 id=43 data-nosnippet>43</a>    <span class="kw">pub </span>genesis_header: GenesisHeader,
 <a href=#44 id=44 data-nosnippet>44</a>    <span class="kw">pub </span>genesis_state: ValidatedState,
 <a href=#45 id=45 data-nosnippet>45</a>    <span class="kw">pub </span>l1_genesis: <span class="prelude-ty">Option</span>&lt;L1BlockInfo&gt;,
@@ -111,7 +111,7 @@
 <a href=#111 id=111 data-nosnippet>111</a>            node_id,
 <a href=#112 id=112 data-nosnippet>112</a>            chain_config,
 <a href=#113 id=113 data-nosnippet>113</a>            l1_client,
-<a href=#114 id=114 data-nosnippet>114</a>            peers: Arc::new(catchup),
+<a href=#114 id=114 data-nosnippet>114</a>            state_catchup: Arc::new(catchup),
 <a href=#115 id=115 data-nosnippet>115</a>            genesis_header: Default::default(),
 <a href=#116 id=116 data-nosnippet>116</a>            genesis_state: ValidatedState {
 <a href=#117 id=117 data-nosnippet>117</a>                chain_config: chain_config.into(),
@@ -141,7 +141,7 @@
 <a href=#141 id=141 data-nosnippet>141</a>            StakeTableFetcher::mock(),
 <a href=#142 id=142 data-nosnippet>142</a>        )));
 <a href=#143 id=143 data-nosnippet>143</a>
-<a href=#144 id=144 data-nosnippet>144</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="number">100</span>);
+<a href=#144 id=144 data-nosnippet>144</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="prelude-val">None</span>, <span class="number">100</span>);
 <a href=#145 id=145 data-nosnippet>145</a>        <span class="self">Self</span>::new(
 <a href=#146 id=146 data-nosnippet>146</a>            <span class="number">0</span>,
 <a href=#147 id=147 data-nosnippet>147</a>            chain_config,
@@ -167,7 +167,7 @@
 <a href=#167 id=167 data-nosnippet>167</a>            <span class="macro">vec!</span>[],
 <a href=#168 id=168 data-nosnippet>168</a>            StakeTableFetcher::mock(),
 <a href=#169 id=169 data-nosnippet>169</a>        )));
-<a href=#170 id=170 data-nosnippet>170</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="number">100</span>);
+<a href=#170 id=170 data-nosnippet>170</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="prelude-val">None</span>, <span class="number">100</span>);
 <a href=#171 id=171 data-nosnippet>171</a>
 <a href=#172 id=172 data-nosnippet>172</a>        <span class="self">Self</span>::new(
 <a href=#173 id=173 data-nosnippet>173</a>            <span class="number">0</span>,
@@ -193,7 +193,7 @@
 <a href=#193 id=193 data-nosnippet>193</a>            StakeTableFetcher::mock(),
 <a href=#194 id=194 data-nosnippet>194</a>        )));
 <a href=#195 id=195 data-nosnippet>195</a>
-<a href=#196 id=196 data-nosnippet>196</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="number">100</span>);
+<a href=#196 id=196 data-nosnippet>196</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="prelude-val">None</span>, <span class="number">100</span>);
 <a href=#197 id=197 data-nosnippet>197</a>        <span class="self">Self</span>::new(
 <a href=#198 id=198 data-nosnippet>198</a>            <span class="number">0</span>,
 <a href=#199 id=199 data-nosnippet>199</a>            ChainConfig::default(),
@@ -218,7 +218,7 @@
 <a href=#218 id=218 data-nosnippet>218</a>            <span class="macro">vec!</span>[],
 <a href=#219 id=219 data-nosnippet>219</a>            StakeTableFetcher::mock(),
 <a href=#220 id=220 data-nosnippet>220</a>        )));
-<a href=#221 id=221 data-nosnippet>221</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="number">100</span>);
+<a href=#221 id=221 data-nosnippet>221</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="prelude-val">None</span>, <span class="number">100</span>);
 <a href=#222 id=222 data-nosnippet>222</a>
 <a href=#223 id=223 data-nosnippet>223</a>        <span class="self">Self</span>::new(
 <a href=#224 id=224 data-nosnippet>224</a>            <span class="number">0</span>,
@@ -297,7 +297,7 @@
 <a href=#297 id=297 data-nosnippet>297</a>            <span class="macro">vec!</span>[],
 <a href=#298 id=298 data-nosnippet>298</a>            StakeTableFetcher::mock(),
 <a href=#299 id=299 data-nosnippet>299</a>        )));
-<a href=#300 id=300 data-nosnippet>300</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="number">100</span>);
+<a href=#300 id=300 data-nosnippet>300</a>        <span class="kw">let </span>coordinator = EpochMembershipCoordinator::new(membership, <span class="prelude-val">None</span>, <span class="number">100</span>);
 <a href=#301 id=301 data-nosnippet>301</a>
 <a href=#302 id=302 data-nosnippet>302</a>        <span class="self">Self</span>::new(
 <a href=#303 id=303 data-nosnippet>303</a>            <span class="number">1u64</span>,
@@ -383,110 +383,132 @@
 <a href=#383 id=383 data-nosnippet>383</a></span><span class="kw">pub mod </span>mock {
 <a href=#384 id=384 data-nosnippet>384</a>    <span class="kw">use </span>std::collections::HashMap;
 <a href=#385 id=385 data-nosnippet>385</a>
-<a href=#386 id=386 data-nosnippet>386</a>    <span class="kw">use </span>async_trait::async_trait;
-<a href=#387 id=387 data-nosnippet>387</a>    <span class="kw">use </span>committable::Commitment;
-<a href=#388 id=388 data-nosnippet>388</a>    <span class="kw">use </span>hotshot_types::data::ViewNumber;
-<a href=#389 id=389 data-nosnippet>389</a>    <span class="kw">use </span>jf_merkle_tree::{ForgetableMerkleTreeScheme, MerkleTreeScheme};
-<a href=#390 id=390 data-nosnippet>390</a>
-<a href=#391 id=391 data-nosnippet>391</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
-<a href=#392 id=392 data-nosnippet>392</a>    <span class="kw">use crate</span>::{
-<a href=#393 id=393 data-nosnippet>393</a>        retain_accounts,
-<a href=#394 id=394 data-nosnippet>394</a>        v0_1::{RewardAccount, RewardMerkleCommitment, RewardMerkleTree},
-<a href=#395 id=395 data-nosnippet>395</a>        BackoffParams, BlockMerkleTree, FeeAccount, FeeMerkleCommitment, FeeMerkleTree, Leaf2,
-<a href=#396 id=396 data-nosnippet>396</a>    };
-<a href=#397 id=397 data-nosnippet>397</a>
-<a href=#398 id=398 data-nosnippet>398</a>    <span class="attr">#[derive(Debug, Clone, Default)]
-<a href=#399 id=399 data-nosnippet>399</a>    </span><span class="kw">pub struct </span>MockStateCatchup {
-<a href=#400 id=400 data-nosnippet>400</a>        backoff: BackoffParams,
-<a href=#401 id=401 data-nosnippet>401</a>        state: HashMap&lt;ViewNumber, Arc&lt;ValidatedState&gt;&gt;,
-<a href=#402 id=402 data-nosnippet>402</a>    }
-<a href=#403 id=403 data-nosnippet>403</a>
-<a href=#404 id=404 data-nosnippet>404</a>    <span class="kw">impl </span>FromIterator&lt;(ViewNumber, Arc&lt;ValidatedState&gt;)&gt; <span class="kw">for </span>MockStateCatchup {
-<a href=#405 id=405 data-nosnippet>405</a>        <span class="kw">fn </span>from_iter&lt;I: IntoIterator&lt;Item = (ViewNumber, Arc&lt;ValidatedState&gt;)&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
-<a href=#406 id=406 data-nosnippet>406</a>            <span class="self">Self </span>{
-<a href=#407 id=407 data-nosnippet>407</a>                backoff: Default::default(),
-<a href=#408 id=408 data-nosnippet>408</a>                state: iter.into_iter().collect(),
-<a href=#409 id=409 data-nosnippet>409</a>            }
-<a href=#410 id=410 data-nosnippet>410</a>        }
-<a href=#411 id=411 data-nosnippet>411</a>    }
-<a href=#412 id=412 data-nosnippet>412</a>
-<a href=#413 id=413 data-nosnippet>413</a>    <span class="attr">#[async_trait]
-<a href=#414 id=414 data-nosnippet>414</a>    </span><span class="kw">impl </span>StateCatchup <span class="kw">for </span>MockStateCatchup {
-<a href=#415 id=415 data-nosnippet>415</a>        <span class="kw">async fn </span>try_fetch_leaves(
-<a href=#416 id=416 data-nosnippet>416</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#417 id=417 data-nosnippet>417</a>            _retry: usize,
-<a href=#418 id=418 data-nosnippet>418</a>            _height: u64,
-<a href=#419 id=419 data-nosnippet>419</a>        ) -&gt; anyhow::Result&lt;Vec&lt;Leaf2&gt;&gt; {
-<a href=#420 id=420 data-nosnippet>420</a>            <span class="prelude-val">Err</span>(<span class="macro">anyhow::anyhow!</span>(<span class="string">"todo"</span>))
-<a href=#421 id=421 data-nosnippet>421</a>        }
-<a href=#422 id=422 data-nosnippet>422</a>
-<a href=#423 id=423 data-nosnippet>423</a>        <span class="kw">async fn </span>try_fetch_accounts(
-<a href=#424 id=424 data-nosnippet>424</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#425 id=425 data-nosnippet>425</a>            _retry: usize,
-<a href=#426 id=426 data-nosnippet>426</a>            _instance: <span class="kw-2">&amp;</span>NodeState,
-<a href=#427 id=427 data-nosnippet>427</a>            _height: u64,
-<a href=#428 id=428 data-nosnippet>428</a>            view: ViewNumber,
-<a href=#429 id=429 data-nosnippet>429</a>            fee_merkle_tree_root: FeeMerkleCommitment,
-<a href=#430 id=430 data-nosnippet>430</a>            accounts: <span class="kw-2">&amp;</span>[FeeAccount],
-<a href=#431 id=431 data-nosnippet>431</a>        ) -&gt; anyhow::Result&lt;FeeMerkleTree&gt; {
-<a href=#432 id=432 data-nosnippet>432</a>            <span class="kw">let </span>src = <span class="kw-2">&amp;</span><span class="self">self</span>.state[<span class="kw-2">&amp;</span>view].fee_merkle_tree;
-<a href=#433 id=433 data-nosnippet>433</a>            <span class="macro">assert_eq!</span>(src.commitment(), fee_merkle_tree_root);
-<a href=#434 id=434 data-nosnippet>434</a>
-<a href=#435 id=435 data-nosnippet>435</a>            <span class="macro">tracing::info!</span>(<span class="string">"catchup: fetching accounts {accounts:?} for view {view:?}"</span>);
-<a href=#436 id=436 data-nosnippet>436</a>            retain_accounts(src, accounts.iter().copied())
-<a href=#437 id=437 data-nosnippet>437</a>        }
+<a href=#386 id=386 data-nosnippet>386</a>    <span class="kw">use </span>alloy::primitives::U256;
+<a href=#387 id=387 data-nosnippet>387</a>    <span class="kw">use </span>anyhow::Context;
+<a href=#388 id=388 data-nosnippet>388</a>    <span class="kw">use </span>async_trait::async_trait;
+<a href=#389 id=389 data-nosnippet>389</a>    <span class="kw">use </span>committable::Commitment;
+<a href=#390 id=390 data-nosnippet>390</a>    <span class="kw">use </span>hotshot_types::{data::ViewNumber, stake_table::HSStakeTable};
+<a href=#391 id=391 data-nosnippet>391</a>    <span class="kw">use </span>jf_merkle_tree::{ForgetableMerkleTreeScheme, MerkleTreeScheme};
+<a href=#392 id=392 data-nosnippet>392</a>
+<a href=#393 id=393 data-nosnippet>393</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#394 id=394 data-nosnippet>394</a>    <span class="kw">use crate</span>::{
+<a href=#395 id=395 data-nosnippet>395</a>        retain_accounts,
+<a href=#396 id=396 data-nosnippet>396</a>        v0_1::{RewardAccount, RewardAccountProof, RewardMerkleCommitment},
+<a href=#397 id=397 data-nosnippet>397</a>        BackoffParams, BlockMerkleTree, FeeAccount, FeeAccountProof, FeeMerkleCommitment, Leaf2,
+<a href=#398 id=398 data-nosnippet>398</a>    };
+<a href=#399 id=399 data-nosnippet>399</a>
+<a href=#400 id=400 data-nosnippet>400</a>    <span class="attr">#[derive(Debug, Clone, Default)]
+<a href=#401 id=401 data-nosnippet>401</a>    </span><span class="kw">pub struct </span>MockStateCatchup {
+<a href=#402 id=402 data-nosnippet>402</a>        backoff: BackoffParams,
+<a href=#403 id=403 data-nosnippet>403</a>        state: HashMap&lt;ViewNumber, Arc&lt;ValidatedState&gt;&gt;,
+<a href=#404 id=404 data-nosnippet>404</a>    }
+<a href=#405 id=405 data-nosnippet>405</a>
+<a href=#406 id=406 data-nosnippet>406</a>    <span class="kw">impl </span>FromIterator&lt;(ViewNumber, Arc&lt;ValidatedState&gt;)&gt; <span class="kw">for </span>MockStateCatchup {
+<a href=#407 id=407 data-nosnippet>407</a>        <span class="kw">fn </span>from_iter&lt;I: IntoIterator&lt;Item = (ViewNumber, Arc&lt;ValidatedState&gt;)&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
+<a href=#408 id=408 data-nosnippet>408</a>            <span class="self">Self </span>{
+<a href=#409 id=409 data-nosnippet>409</a>                backoff: Default::default(),
+<a href=#410 id=410 data-nosnippet>410</a>                state: iter.into_iter().collect(),
+<a href=#411 id=411 data-nosnippet>411</a>            }
+<a href=#412 id=412 data-nosnippet>412</a>        }
+<a href=#413 id=413 data-nosnippet>413</a>    }
+<a href=#414 id=414 data-nosnippet>414</a>
+<a href=#415 id=415 data-nosnippet>415</a>    <span class="attr">#[async_trait]
+<a href=#416 id=416 data-nosnippet>416</a>    </span><span class="kw">impl </span>StateCatchup <span class="kw">for </span>MockStateCatchup {
+<a href=#417 id=417 data-nosnippet>417</a>        <span class="kw">async fn </span>try_fetch_leaf(
+<a href=#418 id=418 data-nosnippet>418</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#419 id=419 data-nosnippet>419</a>            _retry: usize,
+<a href=#420 id=420 data-nosnippet>420</a>            _height: u64,
+<a href=#421 id=421 data-nosnippet>421</a>            _stake_table: HSStakeTable&lt;SeqTypes&gt;,
+<a href=#422 id=422 data-nosnippet>422</a>            _success_threshold: U256,
+<a href=#423 id=423 data-nosnippet>423</a>        ) -&gt; anyhow::Result&lt;Leaf2&gt; {
+<a href=#424 id=424 data-nosnippet>424</a>            <span class="prelude-val">Err</span>(<span class="macro">anyhow::anyhow!</span>(<span class="string">"todo"</span>))
+<a href=#425 id=425 data-nosnippet>425</a>        }
+<a href=#426 id=426 data-nosnippet>426</a>
+<a href=#427 id=427 data-nosnippet>427</a>        <span class="kw">async fn </span>try_fetch_accounts(
+<a href=#428 id=428 data-nosnippet>428</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#429 id=429 data-nosnippet>429</a>            _retry: usize,
+<a href=#430 id=430 data-nosnippet>430</a>            _instance: <span class="kw-2">&amp;</span>NodeState,
+<a href=#431 id=431 data-nosnippet>431</a>            _height: u64,
+<a href=#432 id=432 data-nosnippet>432</a>            view: ViewNumber,
+<a href=#433 id=433 data-nosnippet>433</a>            fee_merkle_tree_root: FeeMerkleCommitment,
+<a href=#434 id=434 data-nosnippet>434</a>            accounts: <span class="kw-2">&amp;</span>[FeeAccount],
+<a href=#435 id=435 data-nosnippet>435</a>        ) -&gt; anyhow::Result&lt;Vec&lt;FeeAccountProof&gt;&gt; {
+<a href=#436 id=436 data-nosnippet>436</a>            <span class="kw">let </span>src = <span class="kw-2">&amp;</span><span class="self">self</span>.state[<span class="kw-2">&amp;</span>view].fee_merkle_tree;
+<a href=#437 id=437 data-nosnippet>437</a>            <span class="macro">assert_eq!</span>(src.commitment(), fee_merkle_tree_root);
 <a href=#438 id=438 data-nosnippet>438</a>
-<a href=#439 id=439 data-nosnippet>439</a>        <span class="kw">async fn </span>try_remember_blocks_merkle_tree(
-<a href=#440 id=440 data-nosnippet>440</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#441 id=441 data-nosnippet>441</a>            _retry: usize,
-<a href=#442 id=442 data-nosnippet>442</a>            _instance: <span class="kw-2">&amp;</span>NodeState,
-<a href=#443 id=443 data-nosnippet>443</a>            _height: u64,
-<a href=#444 id=444 data-nosnippet>444</a>            view: ViewNumber,
-<a href=#445 id=445 data-nosnippet>445</a>            mt: <span class="kw-2">&amp;mut </span>BlockMerkleTree,
-<a href=#446 id=446 data-nosnippet>446</a>        ) -&gt; anyhow::Result&lt;()&gt; {
-<a href=#447 id=447 data-nosnippet>447</a>            <span class="macro">tracing::info!</span>(<span class="string">"catchup: fetching frontier for view {view:?}"</span>);
-<a href=#448 id=448 data-nosnippet>448</a>            <span class="kw">let </span>src = <span class="kw-2">&amp;</span><span class="self">self</span>.state[<span class="kw-2">&amp;</span>view].block_merkle_tree;
-<a href=#449 id=449 data-nosnippet>449</a>
-<a href=#450 id=450 data-nosnippet>450</a>            <span class="macro">assert_eq!</span>(src.commitment(), mt.commitment());
-<a href=#451 id=451 data-nosnippet>451</a>            <span class="macro">assert!</span>(
-<a href=#452 id=452 data-nosnippet>452</a>                src.num_leaves() &gt; <span class="number">0</span>,
-<a href=#453 id=453 data-nosnippet>453</a>                <span class="string">"catchup should not be triggered when blocks tree is empty"
-<a href=#454 id=454 data-nosnippet>454</a>            </span>);
-<a href=#455 id=455 data-nosnippet>455</a>
-<a href=#456 id=456 data-nosnippet>456</a>            <span class="kw">let </span>index = src.num_leaves() - <span class="number">1</span>;
-<a href=#457 id=457 data-nosnippet>457</a>            <span class="kw">let </span>(elem, proof) = src.lookup(index).expect_ok().unwrap();
-<a href=#458 id=458 data-nosnippet>458</a>            mt.remember(index, elem, proof.clone())
-<a href=#459 id=459 data-nosnippet>459</a>                .expect(<span class="string">"Proof verifies"</span>);
-<a href=#460 id=460 data-nosnippet>460</a>
-<a href=#461 id=461 data-nosnippet>461</a>            <span class="prelude-val">Ok</span>(())
-<a href=#462 id=462 data-nosnippet>462</a>        }
-<a href=#463 id=463 data-nosnippet>463</a>
-<a href=#464 id=464 data-nosnippet>464</a>        <span class="kw">async fn </span>try_fetch_chain_config(
-<a href=#465 id=465 data-nosnippet>465</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#466 id=466 data-nosnippet>466</a>            _retry: usize,
-<a href=#467 id=467 data-nosnippet>467</a>            _commitment: Commitment&lt;ChainConfig&gt;,
-<a href=#468 id=468 data-nosnippet>468</a>        ) -&gt; anyhow::Result&lt;ChainConfig&gt; {
-<a href=#469 id=469 data-nosnippet>469</a>            <span class="prelude-val">Ok</span>(ChainConfig::default())
-<a href=#470 id=470 data-nosnippet>470</a>        }
-<a href=#471 id=471 data-nosnippet>471</a>
-<a href=#472 id=472 data-nosnippet>472</a>        <span class="kw">async fn </span>try_fetch_reward_accounts(
-<a href=#473 id=473 data-nosnippet>473</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#474 id=474 data-nosnippet>474</a>            _retry: usize,
-<a href=#475 id=475 data-nosnippet>475</a>            _instance: <span class="kw-2">&amp;</span>NodeState,
-<a href=#476 id=476 data-nosnippet>476</a>            _height: u64,
-<a href=#477 id=477 data-nosnippet>477</a>            _view: ViewNumber,
-<a href=#478 id=478 data-nosnippet>478</a>            _reward_merkle_tree_root: RewardMerkleCommitment,
-<a href=#479 id=479 data-nosnippet>479</a>            _accounts: <span class="kw-2">&amp;</span>[RewardAccount],
-<a href=#480 id=480 data-nosnippet>480</a>        ) -&gt; anyhow::Result&lt;RewardMerkleTree&gt; {
-<a href=#481 id=481 data-nosnippet>481</a>            <span class="macro">anyhow::bail!</span>(<span class="string">"unimplemented"</span>)
-<a href=#482 id=482 data-nosnippet>482</a>        }
-<a href=#483 id=483 data-nosnippet>483</a>
-<a href=#484 id=484 data-nosnippet>484</a>        <span class="kw">fn </span>backoff(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BackoffParams {
-<a href=#485 id=485 data-nosnippet>485</a>            <span class="kw-2">&amp;</span><span class="self">self</span>.backoff
-<a href=#486 id=486 data-nosnippet>486</a>        }
-<a href=#487 id=487 data-nosnippet>487</a>
-<a href=#488 id=488 data-nosnippet>488</a>        <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
-<a href=#489 id=489 data-nosnippet>489</a>            <span class="string">"MockStateCatchup"</span>.into()
-<a href=#490 id=490 data-nosnippet>490</a>        }
-<a href=#491 id=491 data-nosnippet>491</a>    }
-<a href=#492 id=492 data-nosnippet>492</a>}</code></pre></div></section></main></body></html>
+<a href=#439 id=439 data-nosnippet>439</a>            <span class="macro">tracing::info!</span>(<span class="string">"catchup: fetching accounts {accounts:?} for view {view:?}"</span>);
+<a href=#440 id=440 data-nosnippet>440</a>            <span class="kw">let </span>tree = retain_accounts(src, accounts.iter().copied())
+<a href=#441 id=441 data-nosnippet>441</a>                .with_context(|| <span class="string">"failed to retain accounts"</span>)<span class="question-mark">?</span>;
+<a href=#442 id=442 data-nosnippet>442</a>
+<a href=#443 id=443 data-nosnippet>443</a>            <span class="comment">// Verify the proofs
+<a href=#444 id=444 data-nosnippet>444</a>            </span><span class="kw">let </span><span class="kw-2">mut </span>proofs = Vec::new();
+<a href=#445 id=445 data-nosnippet>445</a>            <span class="kw">for </span>account <span class="kw">in </span>accounts {
+<a href=#446 id=446 data-nosnippet>446</a>                <span class="kw">let </span>(proof, <span class="kw">_</span>) = FeeAccountProof::prove(<span class="kw-2">&amp;</span>tree, (<span class="kw-2">*</span>account).into())
+<a href=#447 id=447 data-nosnippet>447</a>                    .context(<span class="macro">format!</span>(<span class="string">"response missing fee account {account}"</span>))<span class="question-mark">?</span>;
+<a href=#448 id=448 data-nosnippet>448</a>                proof
+<a href=#449 id=449 data-nosnippet>449</a>                    .verify(<span class="kw-2">&amp;</span>fee_merkle_tree_root)
+<a href=#450 id=450 data-nosnippet>450</a>                    .context(<span class="macro">format!</span>(<span class="string">"invalid proof for fee account {account}"</span>))<span class="question-mark">?</span>;
+<a href=#451 id=451 data-nosnippet>451</a>                proofs.push(proof);
+<a href=#452 id=452 data-nosnippet>452</a>            }
+<a href=#453 id=453 data-nosnippet>453</a>
+<a href=#454 id=454 data-nosnippet>454</a>            <span class="prelude-val">Ok</span>(proofs)
+<a href=#455 id=455 data-nosnippet>455</a>        }
+<a href=#456 id=456 data-nosnippet>456</a>
+<a href=#457 id=457 data-nosnippet>457</a>        <span class="kw">async fn </span>try_remember_blocks_merkle_tree(
+<a href=#458 id=458 data-nosnippet>458</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#459 id=459 data-nosnippet>459</a>            _retry: usize,
+<a href=#460 id=460 data-nosnippet>460</a>            _instance: <span class="kw-2">&amp;</span>NodeState,
+<a href=#461 id=461 data-nosnippet>461</a>            _height: u64,
+<a href=#462 id=462 data-nosnippet>462</a>            view: ViewNumber,
+<a href=#463 id=463 data-nosnippet>463</a>            mt: <span class="kw-2">&amp;mut </span>BlockMerkleTree,
+<a href=#464 id=464 data-nosnippet>464</a>        ) -&gt; anyhow::Result&lt;()&gt; {
+<a href=#465 id=465 data-nosnippet>465</a>            <span class="macro">tracing::info!</span>(<span class="string">"catchup: fetching frontier for view {view:?}"</span>);
+<a href=#466 id=466 data-nosnippet>466</a>            <span class="kw">let </span>src = <span class="kw-2">&amp;</span><span class="self">self</span>.state[<span class="kw-2">&amp;</span>view].block_merkle_tree;
+<a href=#467 id=467 data-nosnippet>467</a>
+<a href=#468 id=468 data-nosnippet>468</a>            <span class="macro">assert_eq!</span>(src.commitment(), mt.commitment());
+<a href=#469 id=469 data-nosnippet>469</a>            <span class="macro">assert!</span>(
+<a href=#470 id=470 data-nosnippet>470</a>                src.num_leaves() &gt; <span class="number">0</span>,
+<a href=#471 id=471 data-nosnippet>471</a>                <span class="string">"catchup should not be triggered when blocks tree is empty"
+<a href=#472 id=472 data-nosnippet>472</a>            </span>);
+<a href=#473 id=473 data-nosnippet>473</a>
+<a href=#474 id=474 data-nosnippet>474</a>            <span class="kw">let </span>index = src.num_leaves() - <span class="number">1</span>;
+<a href=#475 id=475 data-nosnippet>475</a>            <span class="kw">let </span>(elem, proof) = src.lookup(index).expect_ok().unwrap();
+<a href=#476 id=476 data-nosnippet>476</a>            mt.remember(index, elem, proof.clone())
+<a href=#477 id=477 data-nosnippet>477</a>                .expect(<span class="string">"Proof verifies"</span>);
+<a href=#478 id=478 data-nosnippet>478</a>
+<a href=#479 id=479 data-nosnippet>479</a>            <span class="prelude-val">Ok</span>(())
+<a href=#480 id=480 data-nosnippet>480</a>        }
+<a href=#481 id=481 data-nosnippet>481</a>
+<a href=#482 id=482 data-nosnippet>482</a>        <span class="kw">async fn </span>try_fetch_chain_config(
+<a href=#483 id=483 data-nosnippet>483</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#484 id=484 data-nosnippet>484</a>            _retry: usize,
+<a href=#485 id=485 data-nosnippet>485</a>            _commitment: Commitment&lt;ChainConfig&gt;,
+<a href=#486 id=486 data-nosnippet>486</a>        ) -&gt; anyhow::Result&lt;ChainConfig&gt; {
+<a href=#487 id=487 data-nosnippet>487</a>            <span class="prelude-val">Ok</span>(ChainConfig::default())
+<a href=#488 id=488 data-nosnippet>488</a>        }
+<a href=#489 id=489 data-nosnippet>489</a>
+<a href=#490 id=490 data-nosnippet>490</a>        <span class="kw">async fn </span>try_fetch_reward_accounts(
+<a href=#491 id=491 data-nosnippet>491</a>            <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#492 id=492 data-nosnippet>492</a>            _retry: usize,
+<a href=#493 id=493 data-nosnippet>493</a>            _instance: <span class="kw-2">&amp;</span>NodeState,
+<a href=#494 id=494 data-nosnippet>494</a>            _height: u64,
+<a href=#495 id=495 data-nosnippet>495</a>            _view: ViewNumber,
+<a href=#496 id=496 data-nosnippet>496</a>            _reward_merkle_tree_root: RewardMerkleCommitment,
+<a href=#497 id=497 data-nosnippet>497</a>            _accounts: <span class="kw-2">&amp;</span>[RewardAccount],
+<a href=#498 id=498 data-nosnippet>498</a>        ) -&gt; anyhow::Result&lt;Vec&lt;RewardAccountProof&gt;&gt; {
+<a href=#499 id=499 data-nosnippet>499</a>            <span class="macro">anyhow::bail!</span>(<span class="string">"unimplemented"</span>)
+<a href=#500 id=500 data-nosnippet>500</a>        }
+<a href=#501 id=501 data-nosnippet>501</a>
+<a href=#502 id=502 data-nosnippet>502</a>        <span class="kw">fn </span>backoff(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BackoffParams {
+<a href=#503 id=503 data-nosnippet>503</a>            <span class="kw-2">&amp;</span><span class="self">self</span>.backoff
+<a href=#504 id=504 data-nosnippet>504</a>        }
+<a href=#505 id=505 data-nosnippet>505</a>
+<a href=#506 id=506 data-nosnippet>506</a>        <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+<a href=#507 id=507 data-nosnippet>507</a>            <span class="string">"MockStateCatchup"</span>.into()
+<a href=#508 id=508 data-nosnippet>508</a>        }
+<a href=#509 id=509 data-nosnippet>509</a>
+<a href=#510 id=510 data-nosnippet>510</a>        <span class="kw">fn </span>is_local(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#511 id=511 data-nosnippet>511</a>            <span class="bool-val">true
+<a href=#512 id=512 data-nosnippet>512</a>        </span>}
+<a href=#513 id=513 data-nosnippet>513</a>    }
+<a href=#514 id=514 data-nosnippet>514</a>}</code></pre></div></section></main></body></html>
