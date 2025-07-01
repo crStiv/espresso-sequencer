@@ -359,7 +359,7 @@
 <a href=#359 id=359 data-nosnippet>359</a>        <span class="macro">assert_eq!</span>(log.iter().len(), <span class="number">5</span>);
 <a href=#360 id=360 data-nosnippet>360</a>        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">5 </span>{
 <a href=#361 id=361 data-nosnippet>361</a>            <span class="kw">let </span><span class="kw-2">mut </span>iter = log.iter();
-<a href=#362 id=362 data-nosnippet>362</a>            <span class="macro">assert_eq!</span>(iter.nth(i <span class="kw">as </span>usize).unwrap(), <span class="prelude-val">Some</span>(i), <span class="string">"{:?}"</span>, log);
+<a href=#362 id=362 data-nosnippet>362</a>            <span class="macro">assert_eq!</span>(iter.nth(i <span class="kw">as </span>usize).unwrap(), <span class="prelude-val">Some</span>(i), <span class="string">"{log:?}"</span>);
 <a href=#363 id=363 data-nosnippet>363</a>
 <a href=#364 id=364 data-nosnippet>364</a>            <span class="comment">// `nth` should not only have returned the `n`th element, but also advanced the iterator.
 <a href=#365 id=365 data-nosnippet>365</a>            </span><span class="macro">assert_eq!</span>(

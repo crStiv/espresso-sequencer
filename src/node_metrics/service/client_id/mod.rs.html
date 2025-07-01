@@ -79,7 +79,7 @@
 <a href=#79 id=79 data-nosnippet>79</a>    <span class="attr">#[test]
 <a href=#80 id=80 data-nosnippet>80</a>    </span><span class="kw">fn </span>test_client_id_debug() {
 <a href=#81 id=81 data-nosnippet>81</a>        <span class="kw">let </span>client_id = ClientId::from_count(<span class="number">1</span>);
-<a href=#82 id=82 data-nosnippet>82</a>        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, client_id), <span class="string">"ClientId(1)"</span>);
+<a href=#82 id=82 data-nosnippet>82</a>        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{client_id:?}"</span>), <span class="string">"ClientId(1)"</span>);
 <a href=#83 id=83 data-nosnippet>83</a>    }
 <a href=#84 id=84 data-nosnippet>84</a>
 <a href=#85 id=85 data-nosnippet>85</a>    <span class="attr">#[test]

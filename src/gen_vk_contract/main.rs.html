@@ -8,7 +8,7 @@
 <a href=#8 id=8 data-nosnippet>8</a><span class="kw">use </span>alloy::hex::ToHexExt;
 <a href=#9 id=9 data-nosnippet>9</a><span class="kw">use </span>clap::Parser;
 <a href=#10 id=10 data-nosnippet>10</a><span class="kw">use </span>hotshot_contract_adapter::sol_types::VerifyingKeySol;
-<a href=#11 id=11 data-nosnippet>11</a><span class="kw">use </span>hotshot_types::light_client::STAKE_TABLE_CAPACITY;
+<a href=#11 id=11 data-nosnippet>11</a><span class="kw">use </span>hotshot_types::light_client::DEFAULT_STAKE_TABLE_CAPACITY;
 <a href=#12 id=12 data-nosnippet>12</a><span class="kw">use </span>jf_pcs::prelude::UnivariateUniversalParams;
 <a href=#13 id=13 data-nosnippet>13</a>
 <a href=#14 id=14 data-nosnippet>14</a><span class="attr">#[derive(Parser)]
@@ -42,7 +42,7 @@
 <a href=#42 id=42 data-nosnippet>42</a>    <span class="kw">let </span>(<span class="kw">_</span>, vk) = <span class="kw">if </span>mock {
 <a href=#43 id=43 data-nosnippet>43</a>        hotshot_state_prover::preprocess(<span class="kw-2">&amp;</span>srs, <span class="number">10</span>).expect(<span class="string">"Circuit preprocess failed"</span>)
 <a href=#44 id=44 data-nosnippet>44</a>    } <span class="kw">else </span>{
-<a href=#45 id=45 data-nosnippet>45</a>        hotshot_state_prover::preprocess(<span class="kw-2">&amp;</span>srs, STAKE_TABLE_CAPACITY)
+<a href=#45 id=45 data-nosnippet>45</a>        hotshot_state_prover::preprocess(<span class="kw-2">&amp;</span>srs, DEFAULT_STAKE_TABLE_CAPACITY)
 <a href=#46 id=46 data-nosnippet>46</a>            .expect(<span class="string">"Circuit preprocess failed"</span>)
 <a href=#47 id=47 data-nosnippet>47</a>    };
 <a href=#48 id=48 data-nosnippet>48</a>    <span class="kw">let </span>vk: VerifyingKeySol = vk.into();

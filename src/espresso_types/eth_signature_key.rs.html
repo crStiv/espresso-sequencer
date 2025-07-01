@@ -123,7 +123,7 @@
 <a href=#123 id=123 data-nosnippet>123</a>
 <a href=#124 id=124 data-nosnippet>124</a><span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>EthKeyPair {
 <a href=#125 id=125 data-nosnippet>125</a>    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-<a href=#126 id=126 data-nosnippet>126</a>        <span class="macro">write!</span>(f, <span class="string">"{}"</span>, <span class="self">self</span>)
+<a href=#126 id=126 data-nosnippet>126</a>        std::fmt::Display::fmt(<span class="self">self</span>, f)
 <a href=#127 id=127 data-nosnippet>127</a>    }
 <a href=#128 id=128 data-nosnippet>128</a>}
 <a href=#129 id=129 data-nosnippet>129</a>
@@ -215,8 +215,8 @@
 <a href=#215 id=215 data-nosnippet>215</a>    </span><span class="kw">fn </span>test_fmt() {
 <a href=#216 id=216 data-nosnippet>216</a>        <span class="kw">let </span>key = EthKeyPair::for_test();
 <a href=#217 id=217 data-nosnippet>217</a>        <span class="kw">let </span>expected = <span class="string">"EthKeyPair(address=0xb0cfa4e5893107e2995974ef032957752bb526e9)"</span>;
-<a href=#218 id=218 data-nosnippet>218</a>        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{}"</span>, key), expected);
-<a href=#219 id=219 data-nosnippet>219</a>        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, key), expected);
+<a href=#218 id=218 data-nosnippet>218</a>        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{key}"</span>), expected);
+<a href=#219 id=219 data-nosnippet>219</a>        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{key:?}"</span>), expected);
 <a href=#220 id=220 data-nosnippet>220</a>    }
 <a href=#221 id=221 data-nosnippet>221</a>
 <a href=#222 id=222 data-nosnippet>222</a>    <span class="attr">#[test]

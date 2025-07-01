@@ -2,7 +2,7 @@
 <a href=#2 id=2 data-nosnippet>2</a><span class="kw">use </span>clap::Parser;
 <a href=#3 id=3 data-nosnippet>3</a><span class="kw">use </span>espresso_contract_deployer::network_config::light_client_genesis;
 <a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span>hotshot_contract_adapter::sol_types::{LightClientStateSol, StakeTableStateSol};
-<a href=#5 id=5 data-nosnippet>5</a><span class="kw">use </span>hotshot_types::light_client::STAKE_TABLE_CAPACITY;
+<a href=#5 id=5 data-nosnippet>5</a><span class="kw">use </span>hotshot_types::light_client::DEFAULT_STAKE_TABLE_CAPACITY;
 <a href=#6 id=6 data-nosnippet>6</a><span class="kw">use </span>url::Url;
 <a href=#7 id=7 data-nosnippet>7</a>
 <a href=#8 id=8 data-nosnippet>8</a><span class="attr">#[derive(Parser)]
@@ -21,7 +21,7 @@
 <a href=#21 id=21 data-nosnippet>21</a></span><span class="kw">async fn </span>main() {
 <a href=#22 id=22 data-nosnippet>22</a>    <span class="kw">let </span>args = Args::parse();
 <a href=#23 id=23 data-nosnippet>23</a>    <span class="kw">let </span>pi: (LightClientStateSol, StakeTableStateSol) =
-<a href=#24 id=24 data-nosnippet>24</a>        light_client_genesis(<span class="kw-2">&amp;</span>args.orchestrator_url, STAKE_TABLE_CAPACITY)
+<a href=#24 id=24 data-nosnippet>24</a>        light_client_genesis(<span class="kw-2">&amp;</span>args.orchestrator_url, DEFAULT_STAKE_TABLE_CAPACITY)
 <a href=#25 id=25 data-nosnippet>25</a>            .<span class="kw">await
 <a href=#26 id=26 data-nosnippet>26</a>            </span>.unwrap();
 <a href=#27 id=27 data-nosnippet>27</a>    <span class="macro">println!</span>(<span class="string">"{}"</span>, pi.abi_encode_params().encode_hex());

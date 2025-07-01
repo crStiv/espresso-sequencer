@@ -76,7 +76,7 @@
 <a href=#76 id=76 data-nosnippet>76</a>    {
 <a href=#77 id=77 data-nosnippet>77</a>        <span class="kw">let </span><span class="kw-2">mut </span>st = serializer.serialize_struct(<span class="string">"Unimplemented"</span>, <span class="number">2</span>)<span class="question-mark">?</span>;
 <a href=#78 id=78 data-nosnippet>78</a>        st.serialize_field(<span class="string">"code"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.code())<span class="question-mark">?</span>;
-<a href=#79 id=79 data-nosnippet>79</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}"</span>, <span class="self">self</span>))<span class="question-mark">?</span>;
+<a href=#79 id=79 data-nosnippet>79</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{self}"</span>))<span class="question-mark">?</span>;
 <a href=#80 id=80 data-nosnippet>80</a>        st.end()
 <a href=#81 id=81 data-nosnippet>81</a>    }
 <a href=#82 id=82 data-nosnippet>82</a>}
@@ -117,7 +117,7 @@
 <a href=#117 id=117 data-nosnippet>117</a>    {
 <a href=#118 id=118 data-nosnippet>118</a>        <span class="kw">let </span><span class="kw-2">mut </span>st = serializer.serialize_struct(<span class="string">"InvalidLimit"</span>, <span class="number">2</span>)<span class="question-mark">?</span>;
 <a href=#119 id=119 data-nosnippet>119</a>        st.serialize_field(<span class="string">"code"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.code())<span class="question-mark">?</span>;
-<a href=#120 id=120 data-nosnippet>120</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}"</span>, <span class="self">self</span>))<span class="question-mark">?</span>;
+<a href=#120 id=120 data-nosnippet>120</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{self}"</span>))<span class="question-mark">?</span>;
 <a href=#121 id=121 data-nosnippet>121</a>        st.end()
 <a href=#122 id=122 data-nosnippet>122</a>    }
 <a href=#123 id=123 data-nosnippet>123</a>}
@@ -162,7 +162,7 @@
 <a href=#162 id=162 data-nosnippet>162</a>        <span class="kw">let </span><span class="kw-2">mut </span>st = serializer.serialize_struct(<span class="string">"NotFound"</span>, <span class="number">2</span>)<span class="question-mark">?</span>;
 <a href=#163 id=163 data-nosnippet>163</a>        st.serialize_field(<span class="string">"code"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.code())<span class="question-mark">?</span>;
 <a href=#164 id=164 data-nosnippet>164</a>        st.serialize_field(<span class="string">"key"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.key())<span class="question-mark">?</span>;
-<a href=#165 id=165 data-nosnippet>165</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}"</span>, <span class="self">self</span>))<span class="question-mark">?</span>;
+<a href=#165 id=165 data-nosnippet>165</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{self}"</span>))<span class="question-mark">?</span>;
 <a href=#166 id=166 data-nosnippet>166</a>        st.end()
 <a href=#167 id=167 data-nosnippet>167</a>    }
 <a href=#168 id=168 data-nosnippet>168</a>}
@@ -215,7 +215,7 @@
 <a href=#215 id=215 data-nosnippet>215</a>        <span class="kw">let </span><span class="kw-2">mut </span>st = serializer.serialize_struct(<span class="string">"QueryError"</span>, <span class="number">2</span>)<span class="question-mark">?</span>;
 <a href=#216 id=216 data-nosnippet>216</a>        st.serialize_field(<span class="string">"code"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.code())<span class="question-mark">?</span>;
 <a href=#217 id=217 data-nosnippet>217</a>        st.serialize_field(<span class="string">"error"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.error())<span class="question-mark">?</span>;
-<a href=#218 id=218 data-nosnippet>218</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}"</span>, <span class="self">self</span>))<span class="question-mark">?</span>;
+<a href=#218 id=218 data-nosnippet>218</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{self}"</span>))<span class="question-mark">?</span>;
 <a href=#219 id=219 data-nosnippet>219</a>        st.end()
 <a href=#220 id=220 data-nosnippet>220</a>    }
 <a href=#221 id=221 data-nosnippet>221</a>}
@@ -259,7 +259,7 @@
 <a href=#259 id=259 data-nosnippet>259</a>    {
 <a href=#260 id=260 data-nosnippet>260</a>        <span class="kw">let </span><span class="kw-2">mut </span>st = serializer.serialize_struct(<span class="string">"BadQuery"</span>, <span class="number">2</span>)<span class="question-mark">?</span>;
 <a href=#261 id=261 data-nosnippet>261</a>        st.serialize_field(<span class="string">"code"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.code())<span class="question-mark">?</span>;
-<a href=#262 id=262 data-nosnippet>262</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}"</span>, <span class="self">self</span>))<span class="question-mark">?</span>;
+<a href=#262 id=262 data-nosnippet>262</a>        st.serialize_field(<span class="string">"message"</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{self}"</span>))<span class="question-mark">?</span>;
 <a href=#263 id=263 data-nosnippet>263</a>        st.end()
 <a href=#264 id=264 data-nosnippet>264</a>    }
 <a href=#265 id=265 data-nosnippet>265</a>}

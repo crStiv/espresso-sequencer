@@ -72,7 +72,7 @@
 <a href=#72 id=72 data-nosnippet>72</a><span class="kw">pub fn </span>all_predicates&lt;TYPES: NodeType&gt;(
 <a href=#73 id=73 data-nosnippet>73</a>    predicates: Vec&lt;Box&lt;EventPredicate&lt;TYPES&gt;&gt;&gt;,
 <a href=#74 id=74 data-nosnippet>74</a>) -&gt; Box&lt;TestPredicate&lt;Arc&lt;HotShotEvent&lt;TYPES&gt;&gt;&gt;&gt; {
-<a href=#75 id=75 data-nosnippet>75</a>    <span class="kw">let </span>info = <span class="macro">format!</span>(<span class="string">"{:?}"</span>, predicates);
+<a href=#75 id=75 data-nosnippet>75</a>    <span class="kw">let </span>info = <span class="macro">format!</span>(<span class="string">"{predicates:?}"</span>);
 <a href=#76 id=76 data-nosnippet>76</a>
 <a href=#77 id=77 data-nosnippet>77</a>    <span class="kw">let </span><span class="kw-2">mut </span>unsatisfied: Vec&lt;<span class="kw">_</span>&gt; = predicates.into_iter().map(Arc::new).collect();
 <a href=#78 id=78 data-nosnippet>78</a>
@@ -127,7 +127,7 @@
 <a href=#127 id=127 data-nosnippet>127</a><span class="kw">where
 <a href=#128 id=128 data-nosnippet>128</a>    </span>TYPES: NodeType,
 <a href=#129 id=129 data-nosnippet>129</a>{
-<a href=#130 id=130 data-nosnippet>130</a>    <span class="kw">let </span>info = <span class="macro">format!</span>(<span class="string">"{:?}"</span>, event);
+<a href=#130 id=130 data-nosnippet>130</a>    <span class="kw">let </span>info = <span class="macro">format!</span>(<span class="string">"{event:?}"</span>);
 <a href=#131 id=131 data-nosnippet>131</a>    <span class="kw">let </span>event = Arc::new(event);
 <a href=#132 id=132 data-nosnippet>132</a>
 <a href=#133 id=133 data-nosnippet>133</a>    <span class="kw">let </span>check: EventCallback&lt;TYPES&gt; = Arc::new(<span class="kw">move </span>|e: Arc&lt;HotShotEvent&lt;TYPES&gt;&gt;| {

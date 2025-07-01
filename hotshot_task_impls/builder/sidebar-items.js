@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["BuilderClientError"],"mod":["v0_1","v0_2","v0_99"],"struct":["BuilderClient"]};
+window.SIDEBAR_ITEMS = {"enum":["BuilderClientError"],"mod":["v0_1","v0_2"],"struct":["BuilderClient"]};
